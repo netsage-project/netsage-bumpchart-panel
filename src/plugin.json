@@ -1,5 +1,5 @@
 {
-  "type": "react-bumpchart-panel",
+  "type": "panel",
   "name": "Grafana bumpchart panel",
   "id": "react-bumpchart-simple-panel",
 
