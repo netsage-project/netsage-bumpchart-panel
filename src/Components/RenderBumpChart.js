@@ -87,9 +87,10 @@ export default class SvgHandler {
                 .selectAll(".tick text")
                 .call(wrap, margin.right - 25);
             // Update lines and nodes
-            for (i in parsed_data) {
+            //for (i in parsed_data) 
+            parsed_data.forEach(function(element){
                 //console.log("org-" + i + container);
-                svg.select(".org-" + i + container)
+                svg.select(".org-" + element + container)
                     .duration(750)
                     .attr("d", d3.line().curve(d3.curveMonotoneX)
                         .x(function (d) { return x(d.date) })
@@ -101,7 +102,7 @@ export default class SvgHandler {
                     .duration(750)
                     .attr("cx", function (d) { return x(d.date); })
                     .attr("cy", function (d) { return y(d.rank); })
-            }
+            })
         }
 
         ///////////////////////////// Dropdown ////////////////////////////
@@ -218,7 +219,7 @@ export default class SvgHandler {
             .style("opacity", 0);
 
         // Add the lines
-        for (i in parsed_data) {
+        for (let i = 0; i < parsed_data.length; i++) {
             svg.append("svg")
                 .attr("width", width + margin.spacer)
                 .attr("height", height + margin.spacer + margin.top)
