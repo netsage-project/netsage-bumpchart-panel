@@ -1,5 +1,5 @@
 {
-  "name": "react-bumpchart-panel",
+  "name": "grafana-bumpchart-panel",
   "version": "1.0.0",
   "description": "Grafana Panel Plugin Template",
   "scripts": {
