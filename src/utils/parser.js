@@ -1,7 +1,6 @@
 export function ParseData(data) {
     // console.log(data);
     let parsed_data = [];
-
     let alpha = 1;
 
     let colorPal = ["rgba(223, 79, 79," + alpha + ")",
@@ -19,7 +18,7 @@ export function ParseData(data) {
         "rgba(147, 78, 50," + alpha + ")",
         "rgba(50, 81, 147," + alpha + ")"];
 
-
+    console.log(data);
     // extract raw data by org
     for (var i = 0; i < data.length; i++) {
         var org = data[i].target;
@@ -31,6 +30,7 @@ export function ParseData(data) {
             parsed_data[i].data[j] = { "date": date, "value": value, "rank": 0, "orig_index": parseInt(i) }
         }
     }
+    console.log(parsed_data);
 
       // assign ranks to data
     for (var i in parsed_data[0].data) {
