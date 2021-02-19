@@ -21,11 +21,11 @@ export function ParseData(data) {
 
 
     // extract raw data by org
-    for (i in data) {
+    for (var i in data) {
         org = data[i].target;
         parsed_data[i] = { "org": org, "data": [] };
         let inner_buckets = data[i].datapoints;
-        for (j in inner_buckets) {
+        for (var j in inner_buckets) {
             date = inner_buckets[j][1];
             value = inner_buckets[j][0];
             parsed_data[i].data[j] = { "date": date, "value": value, "rank": 0, "orig_index": parseInt(i) }
@@ -33,21 +33,21 @@ export function ParseData(data) {
     }
 
       // assign ranks to data
-    for (i in parsed_data[0].data) {
+    for (var i in parsed_data[0].data) {
         let temp_array = []
-        for (j in parsed_data) {
+        for (var j in parsed_data) {
             temp_array[j] = parsed_data[j].data[i]
         }
         temp_array.sort((a, b) => { return b.value - a.value })
-        for (let k = 0; k < temp_array.length; k++) {
+        for (var k = 0; k < temp_array.length; k++) {
             parsed_data[temp_array[k].orig_index].data[i].rank = k
         }
     }
 
     // add color and org to data points
 
-    for (i in parsed_data) {
-        for (j in parsed_data[i].data) {
+    for (var i in parsed_data) {
+        for (var j in parsed_data[i].data) {
             parsed_data[i].data[j].org = parsed_data[i].org
             parsed_data[i].data[j].color = colorPal[i % colorPal.length]
         }
@@ -56,7 +56,7 @@ export function ParseData(data) {
     // Starting pos = parsed_data[i].org
     // Find final positions
     let final_positions = [];
-    for (i in parsed_data) {
+    for (var i in parsed_data) {
         let last = parsed_data[i].data[parsed_data[i].data.length - 1];
         final_positions[i] = {
             org: last.org,
@@ -67,7 +67,7 @@ export function ParseData(data) {
 
     // list of dates for x axis
     let dates = [];
-    for (i in parsed_data[0].data) {
+    for (var i in parsed_data[0].data) {
         dates[i] = parsed_data[0].data[i].date;
     }
 
