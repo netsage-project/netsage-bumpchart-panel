@@ -20,6 +20,8 @@ export function ParseData(data) {
 
 
     let dataSeries = data.series;
+    console.log(dataSeries);
+    console.log(dataSeries[0].fields);
 
     // extract raw data by org
     for (var i = 0; i < dataSeries.length; i++) {
@@ -35,7 +37,7 @@ export function ParseData(data) {
 
 
       // assign ranks to data
-    for (var i in parsed_data[0].data) {
+    for (var i = 0; i < parsed_data[0].data.length; i++) {
         let temp_array = []
         for (var j in parsed_data) {
             temp_array[j] = parsed_data[j].data[i]
