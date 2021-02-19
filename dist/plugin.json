@@ -1,7 +1,7 @@
 {
   "type": "panel",
   "name": "Grafana Bump Chart",
-  "id": "react-bumpchart-simple-panel",
+  "id": "react-bump-chart",
 
   "info": {
     "description": "Grafana Panel Plugin Template",
