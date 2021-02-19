@@ -25,7 +25,7 @@ export function ParseData(data) {
     for (var i = 0; i < dataSeries.length; i++) {
         var org = dataSeries[i].name;
         parsed_data[i] = { "org": org, "data": [] };
-        let inner_buckets = data[i].fields;
+        let inner_buckets = dataSeries[i].fields;
         for (var j in inner_buckets) {
             let date = inner_buckets[0].values[j];
             let value = inner_buckets[1].values[j];
