@@ -28,7 +28,7 @@ export function ParseData(data) {
         var org = dataSeries[i].name;
         parsed_data[i] = { "org": org, "data": [] };
         let inner_buckets = dataSeries[i].fields;
-        for (var j in inner_buckets) {
+        for (var j = 0; j < inner_buckets[0].values.length; j++) {
             let date = inner_buckets[0].values[j];
             let value = inner_buckets[1].values[j];
             parsed_data[i].data[j] = { "date": date, "value": value, "rank": 0, "orig_index": parseInt(i) }
@@ -39,7 +39,7 @@ export function ParseData(data) {
       // assign ranks to data
     for (var i = 0; i < parsed_data[0].data.length; i++) {
         let temp_array = []
-        for (var j in parsed_data) {
+        for (var j = 0; j < parsed_data.length; j++) {
             temp_array[j] = parsed_data[j].data[i]
         }
         temp_array.sort((a, b) => { return b.value - a.value })
@@ -50,8 +50,8 @@ export function ParseData(data) {
 
     // add color and org to data points
 
-    for (var i in parsed_data) {
-        for (var j in parsed_data[i].data) {
+    for (var i = 0; i < parsed_data.length; i++) {
+        for (var j = 0; j < parsed_data[0].data.length; j++) {
             parsed_data[i].data[j].org = parsed_data[i].org
             parsed_data[i].data[j].color = colorPal[i % colorPal.length]
         }
