@@ -12,11 +12,17 @@ export default class SvgHandler {
           }
       
           // SUPER IMPORTANT! This clears old chart before drawing new one...
-          d3.select('#' + this.containerID)
+        d3.select('#' + this.containerID)
             .select('svg')
             .remove();
-          d3.select('#' + this.containerID)
+        d3.select('#' + this.containerID)
+            .select('dropdown')
+            .remove();
+        d3.select('#' + this.containerID)
             .select('.tooltip')
+            .remove();
+        d3.select('#' + this.containerID)
+            .select('div')
             .remove();
           // ----------------------------------------------------------
 
