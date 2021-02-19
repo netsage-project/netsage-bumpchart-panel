@@ -18,9 +18,9 @@ export function ParseData(data) {
         "rgba(147, 78, 50," + alpha + ")",
         "rgba(50, 81, 147," + alpha + ")"];
 
-    console.log(data);
+
     let dataSeries = data.series;
-    console.log(dataSeries);
+
     // extract raw data by org
     for (var i = 0; i < dataSeries.length; i++) {
         var org = dataSeries[i].name;
@@ -32,7 +32,7 @@ export function ParseData(data) {
             parsed_data[i].data[j] = { "date": date, "value": value, "rank": 0, "orig_index": parseInt(i) }
         }
     }
-    console.log(parsed_data);
+
 
       // assign ranks to data
     for (var i in parsed_data[0].data) {
@@ -69,7 +69,7 @@ export function ParseData(data) {
 
     // list of dates for x axis
     let dates = [];
-    for (var i in parsed_data[0].data) {
+    for (var i = 0; i< parsed_data[0].data.length; i++) {
         dates[i] = parsed_data[0].data[i].date;
     }
 
