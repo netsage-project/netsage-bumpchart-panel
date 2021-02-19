@@ -21,7 +21,7 @@ export function ParseData(data) {
     console.log(data);
     // extract raw data by org
     for (var i = 0; i < data.length; i++) {
-        var org = data[i].name;
+        var org = data.series[i].name;
         parsed_data[i] = { "org": org, "data": [] };
         let inner_buckets = data[i].fields;
         for (var j in inner_buckets) {
