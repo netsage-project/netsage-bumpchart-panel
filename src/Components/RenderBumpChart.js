@@ -373,5 +373,3 @@ export default class SvgHandler {
             })
     }
 }
-
-module.exports = BumpChart; 
