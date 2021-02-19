@@ -21,12 +21,12 @@ export function ParseData(data) {
     console.log(data);
     // extract raw data by org
     for (var i = 0; i < data.length; i++) {
-        var org = data[i].target;
+        var org = data[i].name;
         parsed_data[i] = { "org": org, "data": [] };
-        let inner_buckets = data[i].datapoints;
+        let inner_buckets = data[i].fields;
         for (var j in inner_buckets) {
-            let date = inner_buckets[j][1];
-            let value = inner_buckets[j][0];
+            let date = inner_buckets[0].values[j];
+            let value = inner_buckets[1].values[j];
             parsed_data[i].data[j] = { "date": date, "value": value, "rank": 0, "orig_index": parseInt(i) }
         }
     }
