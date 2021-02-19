@@ -29,8 +29,8 @@ export function ParseData(data) {
         parsed_data[i] = { "org": org, "data": [] };
         let inner_buckets = dataSeries[i].fields;
         for (var j = 0; j < inner_buckets[0].values.length; j++) {
-            let date = inner_buckets[0].values[j];
-            let value = inner_buckets[1].values[j];
+            let date = inner_buckets[0].values.buffer[j];
+            let value = inner_buckets[1].values.buffer[j];
             parsed_data[i].data[j] = { "date": date, "value": value, "rank": 0, "orig_index": parseInt(i) }
         }
     }
