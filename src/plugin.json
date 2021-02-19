@@ -1,12 +1,12 @@
 {
   "type": "panel",
-  "name": "Grafana bumpchart panel",
+  "name": "Grafana Bump Chart",
   "id": "react-bumpchart-simple-panel",
 
   "info": {
     "description": "Grafana Panel Plugin Template",
     "author": {
-      "name": "Mahesh Khanal"
+      "name": "Katrina Turner"
     },
     "keywords": ["panel", "template"],
     "logos": {
