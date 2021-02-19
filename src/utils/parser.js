@@ -19,9 +19,11 @@ export function ParseData(data) {
         "rgba(50, 81, 147," + alpha + ")"];
 
     console.log(data);
+    let dataSeries = data.series;
+    console.log(dataSeries);
     // extract raw data by org
-    for (var i = 0; i < data.length; i++) {
-        var org = data.series[i].name;
+    for (var i = 0; i < dataSeries.length; i++) {
+        var org = dataSeries[i].name;
         parsed_data[i] = { "org": org, "data": [] };
         let inner_buckets = data[i].fields;
         for (var j in inner_buckets) {
