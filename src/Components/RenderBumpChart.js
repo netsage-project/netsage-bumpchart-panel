@@ -226,7 +226,7 @@ export default class SvgHandler {
 
         // Add the lines
         for (let i = 0; i < parsed_data.length; i++) {
-            console.log(parsed_data[i].data);
+            let currentData = parsed_data[i].data;
             svg.append("svg")
                 .attr("width", width + margin.spacer)
                 .attr("height", height + margin.spacer + margin.top)
@@ -234,7 +234,7 @@ export default class SvgHandler {
                 .attr("transform", "translate(" + margin.spacer + "," + margin.top + ")")
                 .append("path")
                 .attr("class", "org-" + i + container)
-                .datum(parsed_data[i].data)
+                .datum(currentData)
                 .attr("fill", "none")
                 .attr("stroke", colorPal[i % colorPal.length])
                 .attr("opacity", startingOpacity)
@@ -289,7 +289,7 @@ export default class SvgHandler {
                 .append("g")
                 .attr("transform", "translate(" + margin.spacer + "," + margin.top + ")")
                 .selectAll("circle")
-                .data(parsed_data[i].data)
+                .datum(currentData)
                 .enter().append("circle")
                 .attr("class", "org-" + i + container)
                 .attr("cx", function (d) { return x(d.date); })
