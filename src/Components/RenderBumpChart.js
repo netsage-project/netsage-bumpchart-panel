@@ -293,7 +293,7 @@ export default class SvgHandler {
                 .enter().append("circle")
                 .attr("class", "org-" + i + container)
                 .attr("cx", function (d) { return x(d.date); })
-                .attr("cy", function (d) { return y(d.rank); })
+                .attr("cy", function (d) { return d.rank; })
                 .attr('fill', colorPal[i % colorPal.length])
                 .attr("fill-opacity", startingOpacity)
                 .attr("r", 10)
