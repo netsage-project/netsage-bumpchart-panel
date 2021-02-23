@@ -13,16 +13,13 @@ export default class SvgHandler {
       
           // SUPER IMPORTANT! This clears old chart before drawing new one...
         d3.select('#' + this.containerID)
-            .select('svg')
+            .selectAll('svg')
             .remove();
         d3.select('#' + this.containerID)
-            .select('dropdown')
+            .selectAll('dropdownMenu')
             .remove();
         d3.select('#' + this.containerID)
-            .select('.tooltip')
-            .remove();
-        d3.select('#' + this.containerID)
-            .select('div')
+            .selectAll('.tooltip')
             .remove();
           // ----------------------------------------------------------
 
@@ -239,9 +236,11 @@ export default class SvgHandler {
                 .attr("stroke", colorPal[i % colorPal.length])
                 .attr("opacity", startingOpacity)
                 .attr("stroke-width", 7)
-                .attr("d", d3.line().curve(d3.curveMonotoneX)
-                    .x(function (d) { return x(d.date) })
-                    .y(function (d) { return y(d.rank) }))
+                .attr("d", d3.line(d => d.date, d => d.rank).curve(d3.curveMonotoneX))
+
+                    // .attr("d", d3.line().curve(d3.curveMonotoneX)
+                    // .x(function (d) { return x(d.date) })
+                    // .y(function (d) { return y(d.rank) }))
 
                 // Add Tootip and hover settings
                 .on("mouseover", function (d) {
