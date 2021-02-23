@@ -40,6 +40,7 @@ export default class SvgHandler {
             width = panelWidth - margin.left - margin.right,
             height = panelHeight - margin.top - margin.bottom;
 
+        console.log(height);
 
         ////////////////////////// FUNCTIONS ///////////////////////////////////
         // function to wrap text!
@@ -71,6 +72,7 @@ export default class SvgHandler {
         function update(dropdownSelection) {
             // update variables
             yAxisMax = dropdownSelection - 1;
+            
             dataYrange = [0, yAxisMax];
             y.domain(dataYrange);
 
@@ -237,7 +239,7 @@ export default class SvgHandler {
                 .attr("opacity", startingOpacity)
                 .attr("stroke-width", 7)
                 .attr("d", d3.line().curve(d3.curveMonotoneX)
-                    .x(function (d) { return d.date })
+                    .x(function (d) { return x(d.date) })
                     .y(function (d) { return d.rank }))
                 // .attr("d", d3.line(d => d.date, d => d.rank).curve(d3.curveMonotoneX))
 
@@ -293,7 +295,7 @@ export default class SvgHandler {
                 .enter().append("circle")
                 .attr("class", "org-" + i + container)
                 .attr("cx", function (d) { return x(d.date); })
-                .attr("cy", function (d) { return d.rank; })
+                .attr("cy", function (d) { return y(d.rank); })
                 .attr('fill', colorPal[i % colorPal.length])
                 .attr("fill-opacity", startingOpacity)
                 .attr("r", 10)
