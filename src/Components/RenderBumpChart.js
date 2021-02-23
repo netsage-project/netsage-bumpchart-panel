@@ -107,9 +107,11 @@ export default class SvgHandler {
                 svg.selectAll("circle")
                     .duration(750)
                     .attr("cx", function (d) { 
-                        console.log("cx" + x(d.date))
+                        console.log("cx" + x(d.date));
                         return x(d.date); })
-                    .attr("cy", function (d) { return y(d.rank); })
+                    .attr("cy", function (d) { 
+                        console.log("cy" + y(d.rank));
+                        return y(d.rank); })
             })
         }
 
