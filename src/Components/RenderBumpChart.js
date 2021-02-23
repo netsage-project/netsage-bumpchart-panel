@@ -16,7 +16,7 @@ export default class SvgHandler {
             .selectAll('svg')
             .remove();
         d3.select('#' + this.containerID)
-            .selectAll('dropdown')
+            .selectAll('.dropdownMenu')
             .remove();
         d3.select('#' + this.containerID)
             .selectAll('.tooltip')
@@ -72,7 +72,7 @@ export default class SvgHandler {
             // update variables
             yAxisMax = dropdownSelection - 1;
             dataYrange = [0, yAxisMax];
-            y.domain(dataYrange)
+            y.domain(dataYrange);
 
             rightAxis = d3.axisRight(y)
                 .ticks(dropdownSelection)
@@ -237,8 +237,8 @@ export default class SvgHandler {
                 .attr("opacity", startingOpacity)
                 .attr("stroke-width", 7)
                 .attr("d", d3.line().curve(d3.curveMonotoneX)
-                    .x(function (d) { return x(d.date) })
-                    .y(function (d) { return y(d.rank) }))
+                    .x(function (d) { return d.date })
+                    .y(function (d) { return d.rank }))
                 // .attr("d", d3.line(d => d.date, d => d.rank).curve(d3.curveMonotoneX))
 
                     
