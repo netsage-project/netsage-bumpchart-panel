@@ -16,7 +16,7 @@ export default class SvgHandler {
             .selectAll('svg')
             .remove();
         d3.select('#' + this.containerID)
-            .selectAll('dropdownMenu')
+            .selectAll('dropdown')
             .remove();
         d3.select('#' + this.containerID)
             .selectAll('.tooltip')
@@ -231,16 +231,17 @@ export default class SvgHandler {
                 .attr("transform", "translate(" + margin.spacer + "," + margin.top + ")")
                 .append("path")
                 .attr("class", "org-" + i + container)
-                .datum(currentData)
+                .data(currentData)
                 .attr("fill", "none")
                 .attr("stroke", colorPal[i % colorPal.length])
                 .attr("opacity", startingOpacity)
                 .attr("stroke-width", 7)
-                .attr("d", d3.line(d => d.date, d => d.rank).curve(d3.curveMonotoneX))
+                .attr("d", d3.line().curve(d3.curveMonotoneX)
+                    .x(function (d) { return x(d.date) })
+                    .y(function (d) { return y(d.rank) }))
+                // .attr("d", d3.line(d => d.date, d => d.rank).curve(d3.curveMonotoneX))
 
-                    // .attr("d", d3.line().curve(d3.curveMonotoneX)
-                    // .x(function (d) { return x(d.date) })
-                    // .y(function (d) { return y(d.rank) }))
+                    
 
                 // Add Tootip and hover settings
                 .on("mouseover", function (d) {
@@ -288,7 +289,7 @@ export default class SvgHandler {
                 .append("g")
                 .attr("transform", "translate(" + margin.spacer + "," + margin.top + ")")
                 .selectAll("circle")
-                .datum(currentData)
+                .data(currentData)
                 .enter().append("circle")
                 .attr("class", "org-" + i + container)
                 .attr("cx", function (d) { return x(d.date); })
