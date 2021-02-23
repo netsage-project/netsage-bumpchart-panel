@@ -40,8 +40,6 @@ export default class SvgHandler {
             width = panelWidth - margin.left - margin.right,
             height = panelHeight - margin.top - margin.bottom;
 
-        console.log(height);
-
         ////////////////////////// FUNCTIONS ///////////////////////////////////
         // function to wrap text!
         function wrap(text, width) {
@@ -163,6 +161,7 @@ export default class SvgHandler {
         // number top talkers to display
         var yAxisMax = num_top_talkers - 1; // var num_top_talkers set in Viz tab, default: 10
         var dataYrange = [0, yAxisMax];
+        console.log(yAxisMax);
 
         // timestamp formatter
         var dateFormat = d3.timeFormat("%m/%d/%y");
@@ -170,12 +169,15 @@ export default class SvgHandler {
         // Add X scale
         var x = d3.scaleTime()
             .domain(dataXrange)
-            .range([0, width])
+            .range([0, width]);
 
         // Add Y scale
         var y = d3.scaleLinear()
             .domain(dataYrange)
-            .range([0, height])
+            .range([0, height]);
+
+        let test = y(4);
+        console.log("y(4): " + test);
 
         // Add axes
         var rightAxis = d3.axisRight(y)
