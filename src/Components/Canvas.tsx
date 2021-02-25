@@ -13,7 +13,7 @@ export const Canvas = props => {
     console.log(chart);
 
     // data, ctrl, header1, header2
-    chart.renderChart(props.data, props.options.linecount, props.options.headerText);
+    chart.renderChart(props.data, props.options.headerText, props.options.linecount);
 
   });
 

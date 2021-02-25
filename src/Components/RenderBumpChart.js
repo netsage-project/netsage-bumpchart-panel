@@ -25,7 +25,7 @@ export default class SvgHandler {
 
         //////////////////// Variables ///////////////////
         //remove later!!!!!!!
-        num_top_talkers = 10;
+        //num_top_talkers = 10;
 
         let parsed_data = parsedData.parsed_data;
         let final_positions = parsedData.final_positions;
