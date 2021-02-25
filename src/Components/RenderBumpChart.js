@@ -243,10 +243,10 @@ export default class SvgHandler {
                 .attr("stroke", colorPal[i % colorPal.length])
                 .attr("opacity", startingOpacity)
                 .attr("stroke-width", 7)
-                .attr("d", d3.line().curve(d3.curveMonotoneX)
-                    .x(function (d) { return x(d.date) })
-                    .y(function (d) { return y(d.rank) }))
-                // .attr("d", d3.line(d => d.date, d => d.rank).curve(d3.curveMonotoneX))
+                //.attr("d", d3.line().curve(d3.curveMonotoneX)
+                  //  .x(function (d) { return x(d.date) })
+                    //.y(function (d) { return y(d.rank) }))
+                .attr("d", d3.line(d => d.date, d => d.rank).curve(d3.curveMonotoneX))
 
                     
 
