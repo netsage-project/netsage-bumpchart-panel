@@ -1,0 +1,62 @@
+.netsage_boilerplate-custom-style {
+	background: #F8AE63;
+}
+
+div.tooltip {	
+    position: absolute;			
+    text-align: left;
+    color: black;			
+    width: 250px;					
+    height: auto;					
+    padding: 5px 10px;				
+    font: 14px sans-serif;		
+    background: #dde4ed;	
+    border: 5px solid white;		
+    border-radius: 8px;			
+    pointer-events: none;	
+}
+
+.header-text {
+    text-align: left;
+    font: 15px sans-serif;
+    font-weight: bold;
+}
+
+.dropdown-text {
+    text-align: right;
+    font: 14px sans-serif;
+}
+
+.tick {
+    width: 300px;
+    word-wrap: break-word;
+    padding: 10px;
+}
+
+.tick text {
+    width: 300px;
+    word-wrap: break-word;
+    padding: 0;
+    font-size: 12px;
+}
+
+#chart-area{
+	height: inherit;
+}
+.path-hover{
+    cursor: pointer;
+}
+
+.axis {
+    font-size: 13px;
+}
+
+.section-heading {
+    font-weight: bold;
+}
+
+.dropdownMenu {
+    width: 100px;
+    text-align: right;
+    float: right;
+}
