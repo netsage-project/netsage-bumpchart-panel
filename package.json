@@ -22,7 +22,7 @@
     "emotion": "10.0.27"
   },
   "engines": {
-    "node": ">=12 <13"
+    "node": ">=12"
   },
   "dependencies": {
     "d3": "^6.2.0"

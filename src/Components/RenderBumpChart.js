@@ -93,7 +93,7 @@ export default class SvgHandler {
                 .selectAll(".tick text")
                 .call(wrap, margin.right - 25);
             // Update lines and nodes
-            for (i = 0; i < parsed_data.length; i++) {
+            for (var i = 0; i < parsed_data.length; i++) {
             //parsed_data.forEach(function(element){
                 //console.log("org-" + i + container);
                 svg.select(".org-" + i + container)
