@@ -34,7 +34,7 @@ export default class SvgHandler {
 
         let container = this.containerID;
         let startingOpacity = 0.5;
-        let dropdownOptions = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+        let dropdownOptions = [10, 9, 8, 7, 6, 5, 4, 3]
 
         let panelWidth = document.getElementById(this.containerID).offsetWidth;
         let panelHeight = document.getElementById(this.containerID).offsetHeight;
@@ -73,7 +73,7 @@ export default class SvgHandler {
         function update(dropdownSelection) {
             // update variables
             yAxisMax = dropdownSelection - 1;
-            
+            console.log("dropdown: " + dropdownSelection);
             dataYrange = [0, yAxisMax];
             y.domain(dataYrange);
 
@@ -82,7 +82,11 @@ export default class SvgHandler {
                 .tickSize(5)
                 .tickFormat((d) => {
                     console.log("d" + d);
-                    return final_positions[d].org
+                    if (final_positions[d].org == null) {
+                        return "";
+                    } else {
+                        return final_positions[d].org;
+                    }
                 })
 
             var svg = d3.select("#" + container).transition();
