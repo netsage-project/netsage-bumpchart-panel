@@ -8,12 +8,12 @@ export const plugin = new PanelPlugin<SimpleOptions>(SimplePanel).setPanelOption
       path: 'linecount',
       name: 'Number of lines',
       description: 'Number of lines to show',
-      defaultValue:10
+      defaultValue: 10,
     })
     .addTextInput({
-      path:'headerText', 
-      name:"Axis Header",
-      description:'Axis header display', 
-      defaultValue:"Axis header"
-    })
+      path: 'headerText',
+      name: 'Axis Header',
+      description: 'Axis header display',
+      defaultValue: 'Axis header',
+    });
 });

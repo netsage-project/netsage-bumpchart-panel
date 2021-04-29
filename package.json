@@ -1,7 +1,7 @@
 {
-  "name": "grafana-bumpchart-panel",
+  "name": "netsage-bumpchart-panel",
   "version": "1.0.0",
-  "description": "Grafana Panel Plugin Template",
+  "description": "Bump Chart Panel Plugin",
   "scripts": {
     "build": "grafana-toolkit plugin:build",
     "test": "grafana-toolkit plugin:test",
