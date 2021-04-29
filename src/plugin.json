@@ -1,10 +1,10 @@
 {
   "type": "panel",
-  "name": "Grafana Bump Chart",
-  "id": "react-bump-chart",
+  "name": "Bump Chart Panel",
+  "id": "netsage-bumpchart-panel",
 
   "info": {
-    "description": "Grafana Panel Plugin Template",
+    "description": "Bump Chart Panel Plugin",
     "author": {
       "name": "Katrina Turner"
     },

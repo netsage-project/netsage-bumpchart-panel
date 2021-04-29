@@ -1,90 +1,93 @@
 export function ParseData(data) {
-    // console.log(data);
-    let parsed_data = [];
-    let alpha = 1;
+  // console.log(data);
+  let parsed_data = [];
+  let alpha = 1;
 
-    let colorPal = ["rgba(223, 79, 79," + alpha + ")",
-        "rgba(88, 223, 79," + alpha + ")",
-        "rgba(79, 145, 223," + alpha + ")",
-        "rgba(223, 79, 168," + alpha + ")",
-        "rgba(223, 155, 79," + alpha + ")",
-        "rgba(79, 223, 192," + alpha + ")",
-        "rgba(138, 79, 223," + alpha + ")",
-        "rgba(166, 223, 79," + alpha + ")",
-        "rgba(147, 50, 55," + alpha + ")",
-        "rgba(50, 147, 142," + alpha + ")",
-        "rgba(59, 147, 50," + alpha + ")",
-        "rgba(94, 50, 147," + alpha + ")",
-        "rgba(147, 78, 50," + alpha + ")",
-        "rgba(50, 81, 147," + alpha + ")"];
+  let colorPal = [
+    'rgba(223, 79, 79,' + alpha + ')',
+    'rgba(88, 223, 79,' + alpha + ')',
+    'rgba(79, 145, 223,' + alpha + ')',
+    'rgba(223, 79, 168,' + alpha + ')',
+    'rgba(223, 155, 79,' + alpha + ')',
+    'rgba(79, 223, 192,' + alpha + ')',
+    'rgba(138, 79, 223,' + alpha + ')',
+    'rgba(166, 223, 79,' + alpha + ')',
+    'rgba(147, 50, 55,' + alpha + ')',
+    'rgba(50, 147, 142,' + alpha + ')',
+    'rgba(59, 147, 50,' + alpha + ')',
+    'rgba(94, 50, 147,' + alpha + ')',
+    'rgba(147, 78, 50,' + alpha + ')',
+    'rgba(50, 81, 147,' + alpha + ')',
+  ];
 
+  let dataSeries = data.series;
+  console.log(dataSeries);
+  console.log(dataSeries[0].fields);
 
-    let dataSeries = data.series;
-    console.log(dataSeries);
-    console.log(dataSeries[0].fields);
-
-    // extract raw data by org
-    for (var i = 0; i < dataSeries.length; i++) {
-        var org = dataSeries[i].name;
-        parsed_data[i] = { "org": org, "data": [] };
-        let inner_buckets = dataSeries[i].fields;
-        for (var j = 0; j < inner_buckets[0].values.length; j++) {
-            let date = inner_buckets[0].values.buffer[j];
-            let value = inner_buckets[1].values.buffer[j];
-            parsed_data[i].data[j] = { "date": date, "value": value, "rank": 0, "orig_index": parseInt(i) }
-        }
+  // extract raw data by org
+  for (var i = 0; i < dataSeries.length; i++) {
+    var org = dataSeries[i].name;
+    parsed_data[i] = { org: org, data: [] };
+    let inner_buckets = dataSeries[i].fields;
+    for (var j = 0; j < inner_buckets[0].values.length; j++) {
+      let date = inner_buckets[0].values.buffer[j];
+      let value = inner_buckets[1].values.buffer[j];
+      parsed_data[i].data[j] = { date: date, value: value, rank: 0, orig_index: parseInt(i) };
     }
+  }
 
-
-      // assign ranks to data
-    for (var i = 0; i < parsed_data[0].data.length; i++) {
-        let temp_array = []
-        for (var j = 0; j < parsed_data.length; j++) {
-            temp_array[j] = parsed_data[j].data[i]
-        }
-        temp_array.sort((a, b) => { return b.value - a.value })
-        for (var k = 0; k < temp_array.length; k++) {
-            parsed_data[temp_array[k].orig_index].data[i].rank = k
-        }
+  // assign ranks to data
+  for (var i = 0; i < parsed_data[0].data.length; i++) {
+    let temp_array = [];
+    for (var j = 0; j < parsed_data.length; j++) {
+      temp_array[j] = parsed_data[j].data[i];
     }
-
-    // add color and org to data points
-
-    for (var i = 0; i < parsed_data.length; i++) {
-        for (var j = 0; j < parsed_data[0].data.length; j++) {
-            parsed_data[i].data[j].org = parsed_data[i].org
-            parsed_data[i].data[j].color = colorPal[i % colorPal.length]
-        }
+    temp_array.sort((a, b) => {
+      return b.value - a.value;
+    });
+    for (var k = 0; k < temp_array.length; k++) {
+      parsed_data[temp_array[k].orig_index].data[i].rank = k;
     }
+  }
 
-    // Starting pos = parsed_data[i].org
-    // Find final positions
-    let final_positions = [];
-    for (var i in parsed_data) {
-        let last = parsed_data[i].data[parsed_data[i].data.length - 1];
-        final_positions[i] = {
-            org: last.org,
-            rank: last.rank
-        }
+  // add color and org to data points
+
+  for (var i = 0; i < parsed_data.length; i++) {
+    for (var j = 0; j < parsed_data[0].data.length; j++) {
+      parsed_data[i].data[j].org = parsed_data[i].org;
+      parsed_data[i].data[j].color = colorPal[i % colorPal.length];
     }
-    final_positions.sort((a, b) => { return a.rank - b.rank })
+  }
 
-    // list of dates for x axis
-    let dates = [];
-    for (var i = 0; i< parsed_data[0].data.length; i++) {
-        dates[i] = parsed_data[0].data[i].date;
-    }
+  // Starting pos = parsed_data[i].org
+  // Find final positions
+  let final_positions = [];
+  for (var i in parsed_data) {
+    let last = parsed_data[i].data[parsed_data[i].data.length - 1];
+    final_positions[i] = {
+      org: last.org,
+      rank: last.rank,
+    };
+  }
+  final_positions.sort((a, b) => {
+    return a.rank - b.rank;
+  });
 
-    let returnObj = {
-        parsed_data: parsed_data,
-        final_positions: final_positions,
-        colorPal: colorPal,
-        dates: dates
-    }
+  // list of dates for x axis
+  let dates = [];
+  for (var i = 0; i < parsed_data[0].data.length; i++) {
+    dates[i] = parsed_data[0].data[i].date;
+  }
 
-    // console.log("stuff returned")
-    console.log(returnObj);
+  let returnObj = {
+    parsed_data: parsed_data,
+    final_positions: final_positions,
+    colorPal: colorPal,
+    dates: dates,
+  };
 
-    return returnObj;
+  // console.log("stuff returned")
+  console.log(returnObj);
 
+  return returnObj;
 }

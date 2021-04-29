@@ -35,44 +35,49 @@ export default class SvgHandler {
 
     let panelWidth = document.getElementById(this.containerID).offsetWidth;
     let panelHeight = document.getElementById(this.containerID).offsetHeight;
-    
+
     var margin = { top: 25, right: 325, bottom: 150, left: 25, spacer: 25 },
       width = panelWidth - margin.left - margin.right,
       height = panelHeight - margin.top - margin.bottom;
 
     let upperWidth = width + margin.left + margin.right - 120; // dropdown width is 100
 
-    var path = d3.line()
-      .x(function(d) { return x(d.date); })
-      .y(function(d) { return y(d.rank); })
+    var path = d3
+      .line()
+      .x(function(d) {
+        return x(d.date);
+      })
+      .y(function(d) {
+        return y(d.rank);
+      })
       .curve(d3.curveMonotoneX);
 
     // ------------------- Ranges & Scales --------------------
 
     // the date range of available data:
     var dataXrange = d3.extent(parsed_data[0].data, function(d) {
-        return d.date;
-      });
-  
-      // number top talkers to display
-      var yAxisMax = num_top_talkers - 1; // var num_top_talkers set in Viz tab, default: 10
-      var dataYrange = [0, yAxisMax];
-      console.log(yAxisMax);
-  
-      // timestamp formatter
-      var dateFormat = d3.timeFormat('%m/%d/%y');
-  
-      // Add X scale
-      var x = d3
-        .scaleTime()
-        .domain(dataXrange)
-        .range([0, width]);
-  
-      // Add Y scale
-      var y = d3
-        .scaleLinear()
-        .domain(dataYrange)
-        .range([0, height]);
+      return d.date;
+    });
+
+    // number top talkers to display
+    var yAxisMax = num_top_talkers - 1; // var num_top_talkers set in Viz tab, default: 10
+    var dataYrange = [0, yAxisMax];
+    console.log(yAxisMax);
+
+    // timestamp formatter
+    var dateFormat = d3.timeFormat('%m/%d/%y');
+
+    // Add X scale
+    var x = d3
+      .scaleTime()
+      .domain(dataXrange)
+      .range([0, width]);
+
+    // Add Y scale
+    var y = d3
+      .scaleLinear()
+      .domain(dataYrange)
+      .range([0, height]);
 
     // ------------------- FUNCTIONS -------------------
     // function to wrap text!
@@ -115,44 +120,52 @@ export default class SvgHandler {
 
     // A function that updates the chart
     function update(dropdownSelection) {
-        // update variables
-        yAxisMax = dropdownSelection - 1;
-        console.log("dropdown: " + dropdownSelection);
-        dataYrange = [0, yAxisMax];
-        y.domain(dataYrange);
+      // update variables
+      yAxisMax = dropdownSelection - 1;
+      console.log('dropdown: ' + dropdownSelection);
+      dataYrange = [0, yAxisMax];
+      y.domain(dataYrange);
 
-        rightAxis = d3.axisRight(y)
-            .ticks(dropdownSelection)
-            .tickSize(5)
-            .tickFormat((d) => {
-                console.log("d" + d);
-                if (final_positions[d] == null) {
-                    return "";
-                } else {
-                    return final_positions[d].org;
-                }
-            })
+      rightAxis = d3
+        .axisRight(y)
+        .ticks(dropdownSelection)
+        .tickSize(5)
+        .tickFormat(d => {
+          console.log('d' + d);
+          if (final_positions[d] == null) {
+            return '';
+          } else {
+            return final_positions[d].org;
+          }
+        });
 
-        var svg = d3.select("#" + container).transition();
-        // redraw y axis
-        svg.select(".yAxis")
-            .duration(750)
-            .call(rightAxis)
-            .selectAll(".tick text")
-            .call(wrap, margin.right - 25);
-        // Update lines and nodes
-        for (var i = 0; i < parsed_data.length; i++) {
-            var currentData = parsed_data[i].data;
+      var svg = d3.select('#' + container).transition();
+      // redraw y axis
+      svg
+        .select('.yAxis')
+        .duration(750)
+        .call(rightAxis)
+        .selectAll('.tick text')
+        .call(wrap, margin.right - 25);
+      // Update lines and nodes
+      for (var i = 0; i < parsed_data.length; i++) {
+        var currentData = parsed_data[i].data;
         //parsed_data.forEach(function(element){
-            //console.log("org-" + i + container);
-            svg.select(".org-" + i + container)
-                .duration(750)
-                .attr("d", path(currentData))
-            svg.selectAll("circle")
-                .duration(750)
-                .attr("cx", function (d) { return x(d.date); })
-                .attr("cy", function (d) { return y(d.rank); })
-        }
+        //console.log("org-" + i + container);
+        svg
+          .select('.org-' + i + container)
+          .duration(750)
+          .attr('d', path(currentData));
+        svg
+          .selectAll('circle')
+          .duration(750)
+          .attr('cx', function(d) {
+            return x(d.date);
+          })
+          .attr('cy', function(d) {
+            return y(d.rank);
+          });
+      }
     }
 
     ///////////////////////////// Dropdown ////////////////////////////
@@ -207,8 +220,6 @@ export default class SvgHandler {
       .attr('height', height)
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-    
-
     // Add axes
     var rightAxis = d3
       .axisRight(y)
@@ -258,8 +269,6 @@ export default class SvgHandler {
       .append('div')
       .attr('class', 'tooltip')
       .style('opacity', 0);
-
-    
 
     // Add the lines
     for (let i = 0; i < parsed_data.length; i++) {
@@ -424,6 +433,5 @@ export default class SvgHandler {
           .attr('opacity', startingOpacity + 0.2);
         d3.selectAll('path').attr('opacity', startingOpacity);
       });
-
   }
 }
