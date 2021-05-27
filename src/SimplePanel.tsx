@@ -13,7 +13,6 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, id 
   var parsedData = {};
   try {
     parsedData = ParseData(data);
-    console.log(parsedData);
   } catch (error) {
     console.error('Parsing error : ', error);
   }
