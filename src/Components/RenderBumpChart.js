@@ -6,11 +6,9 @@ export default class SvgHandler {
   }
 
   renderChart(parsedData, header1, num_top_talkers) {
-    if (!parsedData) {
-      return;
-    }
-
     // SUPER IMPORTANT! This clears old chart before drawing new one...
+    let panel = document.getElementById(this.containerID);
+    panel.innerHTML = '';
     d3.select('#' + this.containerID)
       .selectAll('svg')
       .remove();
@@ -21,6 +19,16 @@ export default class SvgHandler {
       .selectAll('.tooltip')
       .remove();
     // ----------------------------------------------------------
+    if (parsedData.length == 0) {
+      panel.innerHTML += 'No Data';
+      console.log('no data');
+      return;
+    }
+
+    //if not enough data for specified number, use all data
+    if (parsedData.length < num_top_talkers) {
+      num_top_talkers = parsedData.length;
+    }
 
     // ------------------- Variables -------------------
 
@@ -62,7 +70,6 @@ export default class SvgHandler {
     // number top talkers to display
     var yAxisMax = num_top_talkers - 1; // var num_top_talkers set in Viz tab, default: 10
     var dataYrange = [0, yAxisMax];
-    console.log(yAxisMax);
 
     // timestamp formatter
     var dateFormat = d3.timeFormat('%m/%d/%y');
@@ -122,7 +129,6 @@ export default class SvgHandler {
     function update(dropdownSelection) {
       // update variables
       yAxisMax = dropdownSelection - 1;
-      console.log('dropdown: ' + dropdownSelection);
       dataYrange = [0, yAxisMax];
       y.domain(dataYrange);
 
@@ -131,7 +137,6 @@ export default class SvgHandler {
         .ticks(dropdownSelection)
         .tickSize(5)
         .tickFormat(d => {
-          console.log('d' + d);
           if (final_positions[d] == null) {
             return '';
           } else {
@@ -150,8 +155,6 @@ export default class SvgHandler {
       // Update lines and nodes
       for (var i = 0; i < parsed_data.length; i++) {
         var currentData = parsed_data[i].data;
-        //parsed_data.forEach(function(element){
-        //console.log("org-" + i + container);
         svg
           .select('.org-' + i + container)
           .duration(750)
@@ -226,7 +229,11 @@ export default class SvgHandler {
       .ticks(num_top_talkers - 1)
       .tickSize(5)
       .tickFormat(d => {
-        return final_positions[d].org;
+        if (final_positions[d] == null) {
+          return '';
+        } else {
+          return final_positions[d].org;
+        }
       });
 
     var bottomAxis = d3
@@ -273,13 +280,12 @@ export default class SvgHandler {
     // Add the lines
     for (let i = 0; i < parsed_data.length; i++) {
       var currentData = parsed_data[i].data;
-      // console.log(currentData);
       var line = svg
         .append('svg')
         .attr('width', width + margin.spacer)
         .attr('height', height + margin.spacer + margin.top)
         .append('g')
-        //.data(currentData)
+        .data(currentData)
         .attr('transform', 'translate(' + margin.spacer + ',' + margin.top + ')')
         .append('path')
         .attr('class', 'org-' + i + container)
@@ -312,7 +318,7 @@ export default class SvgHandler {
             .style('opacity', 0.9);
           div
             .html(() => {
-              var text = '<b>' + d[0].org + '</b>';
+              var text = '<b>' + d.org + '</b>';
               return text;
             })
             .style('left', d3.event.pageX + 'px')
@@ -367,7 +373,6 @@ export default class SvgHandler {
       .selectAll('circle')
       .on('mouseover', function(d) {
         let className = d3.select(this).attr('class');
-        console.log(className);
 
         // Circles: selected opacity -> 1, all else -> 0.2
         d3.selectAll('circle').each(function(d) {

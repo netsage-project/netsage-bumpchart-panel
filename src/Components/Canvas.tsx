@@ -9,10 +9,13 @@ export const Canvas = props => {
     const id = props.panelId;
     // const chartDiv = document.getElementById('Chart_' + id);
     const chart = new SvgHandler('Chart_' + id);
-    console.log(chart);
 
     // data, ctrl, header1, header2
-    chart.renderChart(props.data, props.options.headerText, props.options.linecount);
+    if (props.data) {
+      chart.renderChart(props.data, props.options.headerText, props.options.linecount);
+    } else {
+      console.log('NO DATA');
+    }
   });
 
   return <div id={'Chart_' + props.panelId} style={{ height: props.height, width: props.width }}></div>;

@@ -22,7 +22,11 @@ export function ParseData(data) {
 
   let dataSeries = data.series;
   console.log(dataSeries);
-  console.log(dataSeries[0].fields);
+  if (dataSeries.length == 0) {
+    return [];
+  }
+  // console.log(dataSeries[0].fields);
+
 
   // extract raw data by org
   for (var i = 0; i < dataSeries.length; i++) {
