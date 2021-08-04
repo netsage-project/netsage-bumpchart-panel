@@ -1,0 +1,37 @@
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+{
+  "manifestVersion": "2.0.0",
+  "signatureType": "private",
+  "signedByOrg": "netsage",
+  "signedByOrgName": "netsage",
+  "rootUrls": [
+    "https://dashboard.stardust.es.net/",
+    "http://localhost:3000/"
+  ],
+  "plugin": "netsage-bumpchart-panel",
+  "version": "1.0.0",
+  "time": 1628096217747,
+  "keyId": "7e4d0c6a708866e7",
+  "files": {
+    "LICENSE": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1",
+    "module.js.LICENSE.txt": "0d8f66cd4afb566cb5b7e1540c68f43b939d3eba12ace290f18abc4f4cb53ed0",
+    "module.js.map": "54e51bebf1f5fbe13ac5367793cd51c461421b73d3e157532b80bbfae71b3226",
+    "plugin.json": "93a1cba4e4115286edb8250023061eb3f765022253104fb272aba23c1701687b",
+    "README.md": "5ba9f6f81524312f230a70aa9e0745398dbca48307968635730f8ced78c70367",
+    "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
+    "module.js": "99a960e8b5ec2c4560d36feb3975fdf13e462ee6727d26725ac17eca21b98ab6"
+  }
+}
+-----BEGIN PGP SIGNATURE-----
+Version: OpenPGP.js v4.10.1
+Comment: https://openpgpjs.org
+
+wqEEARMKAAYFAmEKxtkACgkQfk0ManCIZud5wQIGOyI3CS7MOwRAtETgi4oB
+ky+FMv+rVMOwoipESXjNHEGv3KLNV3LMZozaLCLsPZ+/iSS8qc9Fi2+vCdHs
+JM7EoDMCCQHgzbeoMK5twsR+4xKQVEWaN1kJ7G+s5BhqngeYy3U9zQdBhFOk
+wiVQ8lC1/fvpiOVbsLos42k8N8Eqc8fzzNkYCg==
+=H2li
+-----END PGP SIGNATURE-----
