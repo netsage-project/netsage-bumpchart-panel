@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import SvgHandler from './RenderBumpChart.js';
 import '../css/styles.css';
 
-// import Chart from 'chart.heatmap.js';
 export const Canvas = props => {
   useEffect(() => {
     console.log('rendering');
