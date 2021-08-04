@@ -8,11 +8,12 @@ Hash: SHA512
   "signedByOrg": "netsage",
   "signedByOrgName": "netsage",
   "rootUrls": [
+    "https://dashboard.stardust.es.net/",
     "http://localhost:3000/"
   ],
   "plugin": "netsage-bumpchart-panel",
   "version": "1.0.0",
-  "time": 1628097871651,
+  "time": 1628096217747,
   "keyId": "7e4d0c6a708866e7",
   "files": {
     "LICENSE": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1",
@@ -28,9 +29,9 @@ Hash: SHA512
 Version: OpenPGP.js v4.10.1
 Comment: https://openpgpjs.org
 
-wqIEARMKAAYFAmEKzU8ACgkQfk0ManCIZueA3wIJAZrfxN8k1uCrQukXsP3m
-KM5OIkqS8ayUek17lfgkxLGsPjAYOzEmVZUPgrlhWCtPzkt6UkJ2tRdmzTdp
-lcrILQsxAgkBCUaaXKPlGzZYBgJPoMA6hT7Eg/BbGy3XL6m9eTpgc2ipQjLS
-tPycCd2I+IMGu/TVxsT1Op98lkAnX5Ya71Mrkyo=
-=QxVO
+wqEEARMKAAYFAmEKxtkACgkQfk0ManCIZud5wQIGOyI3CS7MOwRAtETgi4oB
+ky+FMv+rVMOwoipESXjNHEGv3KLNV3LMZozaLCLsPZ+/iSS8qc9Fi2+vCdHs
+JM7EoDMCCQHgzbeoMK5twsR+4xKQVEWaN1kJ7G+s5BhqngeYy3U9zQdBhFOk
+wiVQ8lC1/fvpiOVbsLos42k8N8Eqc8fzzNkYCg==
+=H2li
 -----END PGP SIGNATURE-----
