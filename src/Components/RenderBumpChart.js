@@ -5,7 +5,7 @@ export default class SvgHandler {
     this.containerID = id;
   }
 
-  renderChart(parsedData, header1, num_top_talkers) {
+  renderChart(data, header1, numLines) {
     // SUPER IMPORTANT! This clears old chart before drawing new one...
     let panel = document.getElementById(this.containerID);
     panel.innerHTML = '';
@@ -19,23 +19,23 @@ export default class SvgHandler {
       .selectAll('.tooltip')
       .remove();
     // ----------------------------------------------------------
-    if (parsedData.length == 0) {
+    if (data.length == 0) {
       panel.innerHTML += 'No Data';
       console.log('no data');
       return;
     }
 
     //if not enough data for specified number, use all data
-    if (parsedData.length < num_top_talkers) {
-      num_top_talkers = parsedData.length;
+    if (data.length < numLines) {
+      numLines = data.length;
     }
 
     // ------------------- Variables -------------------
 
-    let parsed_data = parsedData.parsed_data;
-    let final_positions = parsedData.final_positions;
-    let colorPal = parsedData.colorPal;
-    let dates = parsedData.dates;
+    let parsedData = data.parsedData;
+    let finalPositions = data.finalPositions;
+    let colorPal = data.colorPal;
+    let dates = data.dates;
 
     let container = this.containerID;
     let startingOpacity = 0.5;
@@ -63,12 +63,12 @@ export default class SvgHandler {
     // ------------------- Ranges & Scales --------------------
 
     // the date range of available data:
-    var dataXrange = d3.extent(parsed_data[0].data, function(d) {
+    var dataXrange = d3.extent(parsedData[0].data, function(d) {
       return d.date;
     });
 
     // number top talkers to display
-    var yAxisMax = num_top_talkers - 1; // var num_top_talkers set in Viz tab, default: 10
+    var yAxisMax = numLines - 1; // var numLines set in Viz tab, default: 10
     var dataYrange = [0, yAxisMax];
 
     // timestamp formatter
@@ -137,10 +137,10 @@ export default class SvgHandler {
         .ticks(dropdownSelection)
         .tickSize(5)
         .tickFormat(d => {
-          if (final_positions[d] == null) {
+          if (finalPositions[d] == null) {
             return '';
           } else {
-            return final_positions[d].org;
+            return finalPositions[d].org;
           }
         });
 
@@ -153,8 +153,8 @@ export default class SvgHandler {
         .selectAll('.tick text')
         .call(wrap, margin.right - 25);
       // Update lines and nodes
-      for (var i = 0; i < parsed_data.length; i++) {
-        var currentData = parsed_data[i].data;
+      for (var i = 0; i < parsedData.length; i++) {
+        var currentData = parsedData[i].data;
         svg
           .select('.org-' + i + container)
           .duration(750)
@@ -226,13 +226,13 @@ export default class SvgHandler {
     // Add axes
     var rightAxis = d3
       .axisRight(y)
-      .ticks(num_top_talkers - 1)
+      .ticks(numLines - 1)
       .tickSize(5)
       .tickFormat(d => {
-        if (final_positions[d] == null) {
+        if (finalPositions[d] == null) {
           return '';
         } else {
-          return final_positions[d].org;
+          return finalPositions[d].org;
         }
       });
 
@@ -262,7 +262,7 @@ export default class SvgHandler {
       .attr('transform', 'rotate(-60)')
       .style('text-anchor', 'end');
 
-    // Add axis title.  var header1 comes from Viz tab, default: Source Organizations
+    // Add axis title.  var header1 comes from options, default: Source Organizations
     svg
       .append('text')
       .attr('class', 'header-text')
@@ -278,8 +278,8 @@ export default class SvgHandler {
       .style('opacity', 0);
 
     // Add the lines
-    for (let i = 0; i < parsed_data.length; i++) {
-      var currentData = parsed_data[i].data;
+    for (let i = 0; i < parsedData.length; i++) {
+      var currentData = parsedData[i].data;
       var line = svg
         .append('svg')
         .attr('width', width + margin.spacer)
