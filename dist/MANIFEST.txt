@@ -10,29 +10,30 @@ Hash: SHA512
   "rootUrls": [
     "https://dashboard.stardust.es.net/",
     "http://localhost:3000/",
-    "http://localhost:3002/"
+    "http://localhost:3002/",
+    "https://public.stardust.es.net/"
   ],
   "plugin": "netsage-bumpchart-panel",
   "version": "1.0.0",
-  "time": 1628105802986,
+  "time": 1632506898668,
   "keyId": "7e4d0c6a708866e7",
   "files": {
     "LICENSE": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1",
     "module.js.LICENSE.txt": "0d8f66cd4afb566cb5b7e1540c68f43b939d3eba12ace290f18abc4f4cb53ed0",
-    "module.js.map": "54e51bebf1f5fbe13ac5367793cd51c461421b73d3e157532b80bbfae71b3226",
-    "plugin.json": "93a1cba4e4115286edb8250023061eb3f765022253104fb272aba23c1701687b",
+    "module.js.map": "46a773e3b4d99b1dcf7c1918fa381ae9351d604a3b40294ed23c555c96834ec8",
+    "plugin.json": "3b7369388c7cc885b7c72a3c3fa962bb98bd2c378f398ab0396cf770f6f9ca9b",
     "README.md": "5ba9f6f81524312f230a70aa9e0745398dbca48307968635730f8ced78c70367",
     "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
-    "module.js": "99a960e8b5ec2c4560d36feb3975fdf13e462ee6727d26725ac17eca21b98ab6"
+    "module.js": "0cd10f99e8675d730b3696825e5f88d85813285f3ffcaf3b18e36c7f77a7d307"
   }
 }
 -----BEGIN PGP SIGNATURE-----
 Version: OpenPGP.js v4.10.1
 Comment: https://openpgpjs.org
 
-wqAEARMKAAYFAmEK7EsACgkQfk0ManCIZucPAgIHRaT1MpUN7nXscKiEKaQA
-WHDOOZlIrJw2I97TkV6+jtCqFG0/VdxO06Lx++lA5ULCak65RYtBjdk/du4N
-ALRbar8CB3dPasBf7WjPMcXy0Nj1XcSPaVibhLZvfm93QKFsj+dfS4sx8W5B
-aY54c5blk+SKA6Sanm68UILz2dn2RE7lhn96
-=yofQ
+wqEEARMKAAYFAmFOFBIACgkQfk0ManCIZueCXAIJAfQ49buwZvVjIBri3poB
+4+ejGB8NY4aEgI80xmxll63fWJmLFvYYaXkrLrJwhNncFC8vSVLibeEuUt30
+J+A4Xj1MAgdPLPotdGP2lbl8L+reKW3LuYBcoq95giOWK619qEh7xd/F1PXM
+3WLAS2DJ7qDdoRoYYSIzZEA5JPnofLr2+gDjag==
+=7dMP
 -----END PGP SIGNATURE-----
