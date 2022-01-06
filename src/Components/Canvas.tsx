@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import SvgHandler from './RenderBumpChart.js';
 import '../css/styles.css';
 
-export const Canvas = props => {
+export const Canvas = (props) => {
   useEffect(() => {
     console.log('rendering');
     const id = props.panelId;
