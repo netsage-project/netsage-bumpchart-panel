@@ -399,7 +399,7 @@ export default class SvgHandler {
         div
           .html(() => {
             var rank = d.rank + 1;
-            var value = d.value / 1000;
+            var value = d.value;
             var volume = value + 'bytes';
             value = value / 1000;
             if (value < 1000) {
@@ -417,6 +417,7 @@ export default class SvgHandler {
                   if (value < 1000) {
                     volume = Math.round(value * 10) / 10 + ' TB';
                   } else {
+                    value = value / 1000;
                     volume = Math.round(value * 10) / 10 + ' PB';
                   }
                 }
