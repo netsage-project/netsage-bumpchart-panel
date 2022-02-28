@@ -3,7 +3,7 @@
 [![CI](https://github.com/netsage-project/netsage-bumpchart-panel/actions/workflows/ci.yml/badge.svg)](https://github.com/netsage-project/netsage-bumpchart-panel/actions/workflows/ci.yml)
 [![Release](https://github.com/netsage-project/netsage-bumpchart-panel/actions/workflows/release.yml/badge.svg)](https://github.com/netsage-project/netsage-bumpchart-panel/actions/workflows/release.yml)
 
-This is a panel plugin to generate a bump chart in Grafana 7.0+.  Bump charts are useful for visualizing rank data over time.  The vertical axis is scaled by rank instead of value, which can be useful for overviews or big picture situations. 
+This is a panel plugin to generate a bump chart in Grafana 8.0+.  Bump charts are useful for visualizing rank data over time.  The vertical axis is scaled by rank instead of value, which can be useful for overviews or big picture situations. 
 
 
 ## How it works
