@@ -9,16 +9,16 @@
     "watch": "grafana-toolkit plugin:dev --watch",
     "sign": "grafana-toolkit plugin:sign"
   },
-  "repository": "github:grafana/simple-react-panel",
-  "author": "Grafana Labs <team@grafana.com> (https://grafana.com)",
+  "repository": "github:netsage-project/netsage-bumpchart-panel",
+  "author": "Netsage Project",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/grafana/simple-react-panel/issues",
+    "url": "https://github.com/netsage-project/netsage-bumpchart-panel/issues",
     "email": "plugins@grafana.com"
   },
   "devDependencies": {
     "@grafana/data": "8.3.0",
-    "@grafana/toolkit": "8.0.6",
+    "@grafana/toolkit": "latest",
     "@grafana/ui": "8.3.0",
     "emotion": "10.0.27"
   },
