@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import { useTheme2 } from '@grafana/ui';
 
 export default class SvgHandler {
   constructor(id) {
@@ -36,6 +37,7 @@ export default class SvgHandler {
     let finalPositions = data.finalPositions;
     let colorPal = data.colorPal;
     let dates = data.dates;
+    const theme = useTheme2();
 
     let container = this.containerID;
     let startingOpacity = 0.5;
@@ -150,7 +152,7 @@ export default class SvgHandler {
         .select('.yAxis')
         .duration(750)
         .call(rightAxis)
-        .selectAll('.tick text')
+        .selectAll('.tick-text')
         .call(wrap, margin.right - 25);
       // Update lines and nodes
       for (var i = 0; i < parsedData.length; i++) {
@@ -209,7 +211,8 @@ export default class SvgHandler {
       .attr('class', 'dropdown-text')
       .attr('transform', 'translate(' + upperWidth + ', 20)')
       .style('text-anchor', 'end')
-      .text('Number of Lines to Display: ');
+      .style('font-color', theme.colors.text.primary)
+      .text('Number of Lines to Follow:');
 
     //////////////////////////////// Bump Chart ////////////////////////////////////////
 
@@ -248,7 +251,7 @@ export default class SvgHandler {
       .attr('margin', 10)
       .attr('transform', 'translate(' + (width + margin.spacer) + ',' + margin.top + ')')
       .attr('class', 'yAxis')
-      .selectAll('.tick text')
+      .selectAll('.tick-text')
       .call(wrap, margin.right - 25)
       .attr('transform', 'translate(' + 10 + ',0)');
 
@@ -257,7 +260,7 @@ export default class SvgHandler {
       .call(bottomAxis)
       .attr('class', 'axis')
       .attr('transform', 'translate(' + margin.spacer + ',' + (height + margin.spacer + margin.top) + ')')
-      .selectAll('.tick text')
+      .selectAll('.tick-text')
       .call(wrap, 100)
       .attr('transform', 'rotate(-60)')
       .style('text-anchor', 'end');
@@ -268,6 +271,7 @@ export default class SvgHandler {
       .attr('class', 'header-text')
       .attr('transform', 'translate(' + (width + margin.left + 10) + ' ,' + margin.top / 4 + ')')
       .style('text-anchor', 'start')
+      .style('font-color', theme.colors.text.primary)
       .text(header1);
 
     // For lines tooltip
