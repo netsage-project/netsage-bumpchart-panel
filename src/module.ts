@@ -10,6 +10,14 @@ const buildStandardOptions = (): any => {
 
 export const plugin = new PanelPlugin<SimpleOptions>(SimplePanel)
   .useFieldConfig({
+    disableStandardOptions: [
+    FieldConfigProperty.NoValue,
+    FieldConfigProperty.Max,
+    FieldConfigProperty.Min,
+    FieldConfigProperty.DisplayName,
+    FieldConfigProperty.Thresholds,
+    FieldConfigProperty.Color
+  ],
     standardOptions: buildStandardOptions(),
   })
   .setPanelOptions((builder) => {
