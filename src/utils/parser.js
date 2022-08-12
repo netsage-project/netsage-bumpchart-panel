@@ -19,9 +19,12 @@ export function ParseData(data) {
     'rgba(147, 78, 50,' + alpha + ')',
     'rgba(50, 81, 147,' + alpha + ')',
   ];
+  const valueField = data.series.map((series) => series.fields.find((field) => field.type === 'number'));
+  const display = valueField[0].display;
+
 
   let dataSeries = data.series;
-  console.log(dataSeries);
+  // console.log(dataSeries);
   if (dataSeries.length == 0) {
     return [];
   }
@@ -36,7 +39,8 @@ export function ParseData(data) {
     for (var j = 0; j < inner_buckets[0].values.length; j++) {
       let date = inner_buckets[0].values.buffer[j];
       let value = inner_buckets[1].values.buffer[j];
-      parsedData[i].data[j] = { date: date, value: value, rank: 0, orig_index: parseInt(i) };
+      let suffix = valueField[0].display(value).suffix ? valueField[0].display(value).suffix: '';
+      parsedData[i].data[j] = { date: date, value: valueField[0].display(value).text, suffix: suffix, rank: 0, orig_index: parseInt(i) };
     }
   }
 
@@ -88,10 +92,11 @@ export function ParseData(data) {
     finalPositions: finalPositions,
     colorPal: colorPal,
     dates: dates,
+    display: display,
   };
 
   // console.log("stuff returned")
-  console.log(returnObj);
+  // console.log(returnObj);
 
   return returnObj;
 }

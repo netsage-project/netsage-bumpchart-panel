@@ -5,7 +5,7 @@ export default class SvgHandler {
     this.containerID = id;
   }
 
-  renderChart(data, header1, numLines, theme) {
+  renderChart(data, header1, numLines, tooltipMetric, theme) {
     // SUPER IMPORTANT! This clears old chart before drawing new one...
     let panel = document.getElementById(this.containerID);
     panel.innerHTML = '';
@@ -36,6 +36,7 @@ export default class SvgHandler {
     let finalPositions = data.finalPositions;
     let colorPal = data.colorPal;
     let dates = data.dates;
+    let display = data.display;
 
     let container = this.containerID;
     let startingOpacity = 0.5;
@@ -52,10 +53,10 @@ export default class SvgHandler {
 
     var path = d3
       .line()
-      .x(function(d) {
+      .x(function (d) {
         return x(d.date);
       })
-      .y(function(d) {
+      .y(function (d) {
         return y(d.rank);
       })
       .curve(d3.curveMonotoneX);
@@ -63,7 +64,7 @@ export default class SvgHandler {
     // ------------------- Ranges & Scales --------------------
 
     // the date range of available data:
-    var dataXrange = d3.extent(parsedData[0].data, function(d) {
+    var dataXrange = d3.extent(parsedData[0].data, function (d) {
       return d.date;
     });
 
@@ -75,26 +76,17 @@ export default class SvgHandler {
     var dateFormat = d3.timeFormat('%m/%d/%y');
 
     // Add X scale
-    var x = d3
-      .scaleTime()
-      .domain(dataXrange)
-      .range([0, width]);
+    var x = d3.scaleTime().domain(dataXrange).range([0, width]);
 
     // Add Y scale
-    var y = d3
-      .scaleLinear()
-      .domain(dataYrange)
-      .range([0, height]);
+    var y = d3.scaleLinear().domain(dataYrange).range([0, height]);
 
     // ------------------- FUNCTIONS -------------------
     // function to wrap text!
     function wrap(text, width) {
-      text.each(function() {
+      text.each(function () {
         var text = d3.select(this),
-          words = text
-            .text()
-            .split(/\s+/)
-            .reverse(),
+          words = text.text().split(/\s+/).reverse(),
           word,
           line = [],
           lineNumber = 0,
@@ -136,7 +128,7 @@ export default class SvgHandler {
         .axisRight(y)
         .ticks(dropdownSelection)
         .tickSize(5)
-        .tickFormat(d => {
+        .tickFormat((d) => {
           if (finalPositions[d] == null) {
             return '';
           } else {
@@ -162,10 +154,10 @@ export default class SvgHandler {
         svg
           .selectAll('circle')
           .duration(750)
-          .attr('cx', function(d) {
+          .attr('cx', function (d) {
             return x(d.date);
           })
-          .attr('cy', function(d) {
+          .attr('cy', function (d) {
             return y(d.rank);
           });
       }
@@ -176,7 +168,7 @@ export default class SvgHandler {
     var dropdown = d3
       .select('#' + container)
       .insert('select', 'svg')
-      .on('change', function(d) {
+      .on('change', function (d) {
         // recover the option that has been chosen
         var selectedOption = d3.select(this).property('value');
 
@@ -189,10 +181,10 @@ export default class SvgHandler {
       .data(dropdownOptions)
       .enter()
       .append('option')
-      .text(function(d) {
+      .text(function (d) {
         return d;
       }) // text showed in the menu
-      .attr('value', function(d) {
+      .attr('value', function (d) {
         return d;
       }); // corresponding value returned by the button;
 
@@ -229,7 +221,7 @@ export default class SvgHandler {
       .axisRight(y)
       .ticks(numLines - 1)
       .tickSize(5)
-      .tickFormat(d => {
+      .tickFormat((d) => {
         if (finalPositions[d] == null) {
           return '';
         } else {
@@ -237,11 +229,7 @@ export default class SvgHandler {
         }
       });
 
-    var bottomAxis = d3
-      .axisBottom(x)
-      .tickValues(dates)
-      .tickSize(5)
-      .tickFormat(dateFormat);
+    var bottomAxis = d3.axisBottom(x).tickValues(dates).tickSize(5).tickFormat(dateFormat);
 
     svg
       .append('g')
@@ -273,11 +261,7 @@ export default class SvgHandler {
       .text(header1);
 
     // For lines tooltip
-    var div = d3
-      .select('body')
-      .append('div')
-      .attr('class', 'tooltip')
-      .style('opacity', 0);
+    var div = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
 
     // Add the lines
     for (let i = 0; i < parsedData.length; i++) {
@@ -299,13 +283,13 @@ export default class SvgHandler {
         .attr('d', path(currentData))
 
         // Add Tootip and hover settings
-        .on('mouseover', function(d) {
+        .on('mouseover', function (d) {
           d3.selectAll('path').attr('opacity', 0.2);
           d3.select(this).attr('opacity', 1);
 
           // Circles: selected opacity -> 1, all else -> 0.2
           let className = d3.select(this).attr('class');
-          d3.selectAll('circle').each(function(d) {
+          d3.selectAll('circle').each(function (d) {
             var thisClass = d3.select(this).attr('class');
             var dark = className === thisClass;
 
@@ -314,10 +298,7 @@ export default class SvgHandler {
               .attr('fill-opacity', dark ? 0.9 : 0.2);
           });
 
-          div
-            .transition()
-            .duration(200)
-            .style('opacity', 0.9);
+          div.transition().duration(200).style('opacity', 0.9);
           div
             .html(() => {
               var text = '<b>' + d.org + '</b>';
@@ -326,11 +307,8 @@ export default class SvgHandler {
             .style('left', d3.event.pageX + 'px')
             .style('top', d3.event.pageY - 28 + 'px');
         })
-        .on('mouseout', function(d) {
-          div
-            .transition()
-            .duration(500)
-            .style('opacity', 0);
+        .on('mouseout', function (d) {
+          div.transition().duration(500).style('opacity', 0);
           d3.selectAll('path').attr('opacity', startingOpacity);
           d3.selectAll('circle')
             .attr('fill-opacity', startingOpacity)
@@ -350,10 +328,10 @@ export default class SvgHandler {
         .enter()
         .append('circle')
         .attr('class', 'org-' + i + container)
-        .attr('cx', function(d) {
+        .attr('cx', function (d) {
           return x(d.date);
         })
-        .attr('cy', function(d) {
+        .attr('cy', function (d) {
           return y(d.rank);
         })
         .attr('fill', colorPal[i % colorPal.length])
@@ -366,18 +344,15 @@ export default class SvgHandler {
 
     ///////////////////////
     // point Tooltips
-    var tooltip = d3
-      .select('body')
-      .append('div')
-      .attr('class', 'small-tooltip');
+    var tooltip = d3.select('body').append('div').attr('class', 'small-tooltip');
 
     svg
       .selectAll('circle')
-      .on('mouseover', function(d) {
+      .on('mouseover', function (d) {
         let className = d3.select(this).attr('class');
 
         // Circles: selected opacity -> 1, all else -> 0.2
-        d3.selectAll('circle').each(function(d) {
+        d3.selectAll('circle').each(function (d) {
           var thisClass = d3.select(this).attr('class');
           var dark = className === thisClass;
 
@@ -387,55 +362,25 @@ export default class SvgHandler {
         });
 
         // Lines: selected opacity -> 1, all else -> 0.2
-        d3.selectAll('path').each(function(d) {
+        d3.selectAll('path').each(function (d) {
           var thisClass = d3.select(this).attr('class');
           var dark = className === thisClass;
 
           d3.select(this).attr('opacity', dark ? 1 : 0.2);
         });
 
-        div
-          .transition()
-          .duration(200)
-          .style('opacity', 0.9);
+        div.transition().duration(200).style('opacity', 0.9);
         div
           .html(() => {
             var rank = d.rank + 1;
-            var value = d.value;
-            var volume = value + 'bytes';
-            value = value / 1000;
-            if (value < 1000) {
-              volume = Math.round(value * 10) / 10 + ' KB';
-            } else {
-              value = value / 1000;
-              if (value < 1000) {
-                volume = Math.round(value * 10) / 10 + ' MB';
-              } else {
-                value = value / 1000;
-                if (value < 1000) {
-                  volume = Math.round(value * 10) / 10 + ' GB';
-                } else {
-                  value = value / 1000;
-                  if (value < 1000) {
-                    volume = Math.round(value * 10) / 10 + ' TB';
-                  } else {
-                    value = value / 1000;
-                    volume = Math.round(value * 10) / 10 + ' PB';
-                  }
-                }
-              }
-            }
-            var text = '<b>#' + rank + ': </b>' + d.org + '<br><b>Volume: </b>' + volume;
+            var text = `<b># ${rank}:</b> ${d.org} <br><b>${tooltipMetric}: </b> ${d.value} ${d.suffix}`;
             return text;
           })
           .style('left', d3.event.pageX + 'px')
           .style('top', d3.event.pageY - 28 + 'px');
       })
-      .on('mouseout', function(d) {
-        div
-          .transition()
-          .duration(500)
-          .style('opacity', 0);
+      .on('mouseout', function (d) {
+        div.transition().duration(500).style('opacity', 0);
         d3.selectAll('circle')
           .attr('fill-opacity', startingOpacity)
           .attr('opacity', startingOpacity + 0.2);

@@ -13,7 +13,7 @@ export const Canvas = (props) => {
 
     // data, ctrl, header1, header2
     if (props.data) {
-      chart.renderChart(props.data, props.options.headerText, props.options.linecount, theme);
+      chart.renderChart(props.data, props.options.headerText, props.options.linecount, props.options.tooltipMetric, theme);
     } else {
       console.log('NO DATA');
     }
