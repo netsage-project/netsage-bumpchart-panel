@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import SvgHandler from './RenderBumpChart.js';
 import '../css/styles.css';
+import { useTheme2 } from '@grafana/ui';
 
 export const Canvas = (props) => {
+  const theme = useTheme2();
   useEffect(() => {
     console.log('rendering');
     const id = props.panelId;
@@ -11,7 +13,7 @@ export const Canvas = (props) => {
 
     // data, ctrl, header1, header2
     if (props.data) {
-      chart.renderChart(props.data, props.options.headerText, props.options.linecount);
+      chart.renderChart(props.data, props.options.headerText, props.options.linecount, theme);
     } else {
       console.log('NO DATA');
     }

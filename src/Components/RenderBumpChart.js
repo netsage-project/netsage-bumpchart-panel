@@ -1,12 +1,11 @@
 import * as d3 from 'd3';
-import { useTheme2 } from '@grafana/ui';
 
 export default class SvgHandler {
   constructor(id) {
     this.containerID = id;
   }
 
-  renderChart(data, header1, numLines) {
+  renderChart(data, header1, numLines, theme) {
     // SUPER IMPORTANT! This clears old chart before drawing new one...
     let panel = document.getElementById(this.containerID);
     panel.innerHTML = '';
@@ -37,7 +36,6 @@ export default class SvgHandler {
     let finalPositions = data.finalPositions;
     let colorPal = data.colorPal;
     let dates = data.dates;
-    const theme = useTheme2();
 
     let container = this.containerID;
     let startingOpacity = 0.5;
@@ -208,11 +206,11 @@ export default class SvgHandler {
 
     dropdownLabel
       .append('text')
-      .attr('class', 'dropdown-text')
+      // .attr('class', 'dropdown-text')
       .attr('transform', 'translate(' + upperWidth + ', 20)')
       .style('text-anchor', 'end')
-      .style('font-color', theme.colors.text.primary)
-      .text('Number of Lines to Follow:');
+      .style('fill', theme.colors.text.primary)
+      .text('Number of Lines to Display:');
 
     //////////////////////////////// Bump Chart ////////////////////////////////////////
 
@@ -271,7 +269,7 @@ export default class SvgHandler {
       .attr('class', 'header-text')
       .attr('transform', 'translate(' + (width + margin.left + 10) + ' ,' + margin.top / 4 + ')')
       .style('text-anchor', 'start')
-      .style('font-color', theme.colors.text.primary)
+      .style('fill', theme.colors.text.primary)
       .text(header1);
 
     // For lines tooltip
