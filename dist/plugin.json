@@ -1,0 +1,29 @@
+{
+  "type": "panel",
+  "name": "Bump Chart Panel",
+  "id": "netsage-bumpchart-panel",
+
+  "info": {
+    "description": "Bump Chart Panel Plugin",
+    "author": {
+      "name": "Katrina Turner"
+    },
+    "keywords": ["panel", "template"],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {"name": "Website", "url": "https://github.com/grafana/simple-react-panel"},
+      {"name": "License", "url": "https://github.com/grafana/simple-react-panel/blob/master/LICENSE"}
+    ],
+    "screenshots": [],
+    "version": "1.0.1",
+    "updated": "2022-08-12"
+  },
+
+  "dependencies": {
+    "grafanaDependency": ">=7.0.0",
+    "plugins": []
+  }
+}
