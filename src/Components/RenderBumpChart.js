@@ -5,7 +5,7 @@ export default class SvgHandler {
     this.containerID = id;
   }
 
-  renderChart(data, header1, numLines) {
+  renderChart(data, header1, numLines, theme) {
     // SUPER IMPORTANT! This clears old chart before drawing new one...
     let panel = document.getElementById(this.containerID);
     panel.innerHTML = '';
@@ -150,7 +150,7 @@ export default class SvgHandler {
         .select('.yAxis')
         .duration(750)
         .call(rightAxis)
-        .selectAll('.tick text')
+        .selectAll('.tick-text')
         .call(wrap, margin.right - 25);
       // Update lines and nodes
       for (var i = 0; i < parsedData.length; i++) {
@@ -206,10 +206,11 @@ export default class SvgHandler {
 
     dropdownLabel
       .append('text')
-      .attr('class', 'dropdown-text')
+      // .attr('class', 'dropdown-text')
       .attr('transform', 'translate(' + upperWidth + ', 20)')
       .style('text-anchor', 'end')
-      .text('Number of Lines to Display: ');
+      .style('fill', theme.colors.text.primary)
+      .text('Number of Lines to Display:');
 
     //////////////////////////////// Bump Chart ////////////////////////////////////////
 
@@ -248,7 +249,7 @@ export default class SvgHandler {
       .attr('margin', 10)
       .attr('transform', 'translate(' + (width + margin.spacer) + ',' + margin.top + ')')
       .attr('class', 'yAxis')
-      .selectAll('.tick text')
+      .selectAll('.tick-text')
       .call(wrap, margin.right - 25)
       .attr('transform', 'translate(' + 10 + ',0)');
 
@@ -257,7 +258,7 @@ export default class SvgHandler {
       .call(bottomAxis)
       .attr('class', 'axis')
       .attr('transform', 'translate(' + margin.spacer + ',' + (height + margin.spacer + margin.top) + ')')
-      .selectAll('.tick text')
+      .selectAll('.tick-text')
       .call(wrap, 100)
       .attr('transform', 'rotate(-60)')
       .style('text-anchor', 'end');
@@ -268,6 +269,7 @@ export default class SvgHandler {
       .attr('class', 'header-text')
       .attr('transform', 'translate(' + (width + margin.left + 10) + ' ,' + margin.top / 4 + ')')
       .style('text-anchor', 'start')
+      .style('fill', theme.colors.text.primary)
       .text(header1);
 
     // For lines tooltip
