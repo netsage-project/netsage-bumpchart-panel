@@ -282,6 +282,7 @@ export default class SvgHandler {
       .style('font-family', theme.typography.fontFamily.sansSerif)
       .style('color', theme.colors.text.primary)
       .style('box-shadow', '3px 3px 6px lightgray')
+      .style('border', 'none')
       .style('padding', '5px')
       .style('opacity', 0);
 
