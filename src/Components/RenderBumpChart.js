@@ -374,7 +374,17 @@ export default class SvgHandler {
 
     ///////////////////////
     // point Tooltips
-    var tooltip = d3.select('body').append('div').attr('class', 'small-tooltip');
+    var tooltip = d3
+      .select('body')
+      .append('div')
+      .attr('class', 'tooltip')
+      .style('background-color', theme.colors.background.primary)
+      .style('font-family', theme.typography.fontFamily.sansSerif)
+      .style('color', theme.colors.text.primary)
+      .style('box-shadow', '3px 3px 6px lightgray')
+      .style('border', 'none')
+      .style('padding', '10px')
+      .style('opacity', '0');
 
     svg
       .selectAll('circle')
