@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## v1.0.2
+## v1.0.3
 
-Initial Release to Grafana
+- Update Tooling
+- Add label width option
+- Add text size option
+- Truncate labels if too long

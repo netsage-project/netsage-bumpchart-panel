@@ -17,6 +17,10 @@ The plugin sorts the groups by value and displays the top N number of groups as 
 
 **Axis Header**: The Header for the vertical axis showing all the labels.  In the example above, "Organization" is the header.
 
+**Tooltip text for value**: The text that will show up in the tooltip to describe the value.
+
+**Label Width**: The allotted right margin width.  Labels that are too long to fit will be truncated.
+
 **Interval**: Whatever interval you set for your time series data will be the size of the bins for the bumpchart. In the example above, 2 weeks was chosen for the interval.
 
 
