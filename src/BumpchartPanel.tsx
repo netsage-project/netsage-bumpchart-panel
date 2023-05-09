@@ -12,7 +12,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height, id 
     ...options,
   };
   // const theme = useTheme2();
-  var parsedData = {};
+  let parsedData = {};
   try {
     parsedData = ParseData(data);
   } catch (error) {

@@ -39,5 +39,17 @@ export const plugin = new PanelPlugin<SimpleOptions>(SimplePanel)
         name: 'Tooltip text for value',
         description: 'Text to describe metric',
         defaultValue: 'Value',
+      })
+      .addNumberInput({
+        path: 'labelMargin',
+        name: 'Label Width',
+        description: 'Width of right margin for labels',
+        defaultValue: 150,
+      })
+      .addNumberInput({
+        path: 'txtSize',
+        name: 'Label Size',
+        description: 'The text size of the label',
+        defaultValue: 10,
       });
   });
