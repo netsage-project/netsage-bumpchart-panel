@@ -21,7 +21,7 @@ export default class SvgHandler {
     // ----------------------------------------------------------
     if (data.length == 0) {
       panel.innerHTML += 'No Data';
-      console.log('no data');
+      console.error('no data');
       return;
     }
 
