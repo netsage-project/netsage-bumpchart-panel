@@ -37,6 +37,7 @@ export function ParseData(data) {
       let suffix = valueField.display(values[i]).suffix ? valueField.display(values[i]).suffix : '';
       thisData.push({
         date: timeValues[i],
+        valueRaw: values[i],
         value: valueField.display(values[i]).text,
         suffix: suffix,
         rank: 0,
@@ -53,7 +54,7 @@ export function ParseData(data) {
       tempArray.push(row.data[i]);                     // collect data points for each row
     })
     tempArray.sort((a, b) => {                         // sort them by value
-      return b.value - a.value;
+      return b.valueRaw - a.valueRaw;
     });
     for (var r = 0; r < tempArray.length; r++) {
       parsedData[tempArray[r].originalIndex].data[i].rank = r;

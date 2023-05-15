@@ -9,7 +9,6 @@ export const Canvas = (props: { panelId: any; data: any; options: {
 }; height: any; width: any; }) => {
   const theme = useTheme2();
   useEffect(() => {
-    console.log('rendering');
     const id = props.panelId;
     // const chartDiv = document.getElementById('Chart_' + id);
     const chart = new SvgHandler('Chart_' + id);
