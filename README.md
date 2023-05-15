@@ -21,6 +21,8 @@ The plugin sorts the groups by value and displays the top N number of groups as 
 
 **Label Width**: The allotted right margin width.  Labels that are too long to fit will be truncated.
 
+**Label Size**: The font size for the right axis labels.
+
 **Interval**: Whatever interval you set for your time series data will be the size of the bins for the bumpchart. In the example above, 2 weeks was chosen for the interval.
 
 
