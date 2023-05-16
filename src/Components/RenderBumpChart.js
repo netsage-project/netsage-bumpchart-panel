@@ -321,14 +321,12 @@ export default class SvgHandler {
               .attr('fill-opacity', dark ? 0.9 : 0.2);
           });
 
-          //like the mouseover above go ahead and render the text so we can calculate its size
-          //and position correctly.
-          div.transition().duration(200).style('opacity', 0.9);
-          div
-            .html(() => {
-              var text = `<p><b>${d.name}</b>`;
-              return text;
-            });
+          // create div text
+          // div.transition().duration(200).style('opacity', 0.9);
+          div.html(() => {
+            var text = `<p><b>${d.name}</b>`;
+            return text;
+          });
 
           var rect = event.target.getBoundingClientRect();
           var divSize = div.node().getBoundingClientRect();
@@ -336,9 +334,11 @@ export default class SvgHandler {
           div
             .style('left', rect.left + rect.width - divSize.width / 2 + 'px')
             .style('top', rect.top - divSize.height - 5 + 'px')
-            .style('opacity', 1);
+            .transition()
+            .duration(200)
+            .style('opacity', 0.9);
         })
-        .on('mouseout', function (d) {
+        .on('mouseout', function (d, i) {
           div.transition().duration(500).style('opacity', 0).attr('transform', 'translate(0, 0)');
           d3.selectAll('path').attr('opacity', startingOpacity);
           d3.selectAll('circle')
