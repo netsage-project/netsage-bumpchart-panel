@@ -390,7 +390,6 @@ export default class SvgHandler {
       .selectAll('circle')
       .on('mouseover', function (event, d) {
         let className = d3.select(this).attr('class');
-        console.log(d);
 
         // Circles: selected opacity -> 1, all else -> 0.2
         d3.selectAll('circle').each(function (d) {
