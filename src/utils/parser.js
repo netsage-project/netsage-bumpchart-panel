@@ -1,6 +1,4 @@
 export function ParseData(data) {
-  // console.log(data);
-  let parsedData = [];
   let alpha = 1;
 
   let colorPal = [
@@ -19,42 +17,47 @@ export function ParseData(data) {
     'rgba(147, 78, 50,' + alpha + ')',
     'rgba(50, 81, 147,' + alpha + ')',
   ];
-  const valueField = data.series.map((series) => series.fields.find((field) => field.type === 'number'));
-  const display = valueField[0].display;
-
 
   let dataSeries = data.series;
-  // console.log(dataSeries);
   if (dataSeries.length == 0) {
     return [];
   }
-  // console.log(dataSeries[0].fields);
+  const display = dataSeries.map((series) => series.fields.find((field) => field.type === 'number'))[0].display;
 
-
-  // extract raw data by org
-  for (var i = 0; i < dataSeries.length; i++) {
-    var org = dataSeries[i].name;
-    parsedData[i] = { org: org, data: [] };
-    let inner_buckets = dataSeries[i].fields;
-    for (var j = 0; j < inner_buckets[0].values.length; j++) {
-      let date = inner_buckets[0].values.buffer[j];
-      let value = inner_buckets[1].values.buffer[j];
-      let suffix = valueField[0].display(value).suffix ? valueField[0].display(value).suffix: '';
-      parsedData[i].data[j] = { date: date, value: valueField[0].display(value).text, suffix: suffix, rank: 0, orig_index: parseInt(i) };
+  // extract raw data
+  let parsedData = [];
+  dataSeries.forEach((row) => {
+    const thisName = row.name;
+    const timeField = row.fields.find((field) => field.type === 'time');
+    const valueField = row.fields.find((field) => field.type === 'number');
+    const timeValues = timeField.values.buffer;
+    const values = valueField.values.buffer;
+    let thisData = [];
+    for (let i = 0; i < timeValues.length; i++) {
+      let suffix = valueField.display(values[i]).suffix ? valueField.display(values[i]).suffix : '';
+      thisData.push({
+        date: timeValues[i],
+        valueRaw: values[i],
+        value: valueField.display(values[i]).text,
+        suffix: suffix,
+        rank: 0,
+        originalIndex: parseInt(dataSeries.indexOf(row)),
+      });
     }
-  }
+    parsedData.push({ name: thisName, data: thisData });
+  });
 
   // assign ranks to data
-  for (var i = 0; i < parsedData[0].data.length; i++) {
-    let temp_array = [];
-    for (var j = 0; j < parsedData.length; j++) {
-      temp_array[j] = parsedData[j].data[i];
-    }
-    temp_array.sort((a, b) => {
-      return b.value - a.value;
+  for (var i = 0; i < parsedData[0].data.length; i++) { // for each date
+    let tempArray = [];
+    parsedData.forEach((row) => {
+      tempArray.push(row.data[i]);                     // collect data points for each row
+    })
+    tempArray.sort((a, b) => {                         // sort them by value
+      return b.valueRaw - a.valueRaw;
     });
-    for (var k = 0; k < temp_array.length; k++) {
-      parsedData[temp_array[k].orig_index].data[i].rank = k;
+    for (var r = 0; r < tempArray.length; r++) {
+      parsedData[tempArray[r].originalIndex].data[i].rank = r;
     }
   }
 
@@ -62,18 +65,18 @@ export function ParseData(data) {
 
   for (var i = 0; i < parsedData.length; i++) {
     for (var j = 0; j < parsedData[0].data.length; j++) {
-      parsedData[i].data[j].org = parsedData[i].org;
+      parsedData[i].data[j].name = parsedData[i].name;
       parsedData[i].data[j].color = colorPal[i % colorPal.length];
     }
   }
 
-  // Starting pos = parsedData[i].org
+  // Starting pos = parsedData[i].name
   // Find final positions
   let finalPositions = [];
   for (var i in parsedData) {
     let last = parsedData[i].data[parsedData[i].data.length - 1];
     finalPositions[i] = {
-      org: last.org,
+      name: last.name,
       rank: last.rank,
     };
   }
@@ -94,9 +97,6 @@ export function ParseData(data) {
     dates: dates,
     display: display,
   };
-
-  // console.log("stuff returned")
-  // console.log(returnObj);
 
   return returnObj;
 }

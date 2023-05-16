@@ -5,7 +5,7 @@ export default class SvgHandler {
     this.containerID = id;
   }
 
-  renderChart(data, header1, numLines, tooltipMetric, theme) {
+  renderChart(data, header1, numLines, tooltipMetric, theme, labelMargin, txtSize) {
     // SUPER IMPORTANT! This clears old chart before drawing new one...
     let panel = document.getElementById(this.containerID);
     panel.innerHTML = '';
@@ -21,7 +21,7 @@ export default class SvgHandler {
     // ----------------------------------------------------------
     if (data.length == 0) {
       panel.innerHTML += 'No Data';
-      console.log('no data');
+      console.error('no data');
       return;
     }
 
@@ -37,6 +37,7 @@ export default class SvgHandler {
     let colorPal = data.colorPal;
     let dates = data.dates;
     let display = data.display;
+    let txtLength = Math.floor((labelMargin - 10) / (txtSize * 0.75));
 
     let container = this.containerID;
     let startingOpacity = 0.5;
@@ -45,7 +46,7 @@ export default class SvgHandler {
     let panelWidth = document.getElementById(this.containerID).offsetWidth;
     let panelHeight = document.getElementById(this.containerID).offsetHeight;
 
-    var margin = { top: 25, right: 325, bottom: 150, left: 25, spacer: 25 },
+    var margin = { top: 25, right: labelMargin, bottom: 150, left: 25, spacer: 25 },
       width = panelWidth - margin.left - margin.right,
       height = panelHeight - margin.top - margin.bottom;
 
@@ -82,6 +83,15 @@ export default class SvgHandler {
     var y = d3.scaleLinear().domain(dataYrange).range([0, height]);
 
     // ------------------- FUNCTIONS -------------------
+    function truncateLabel(text, width) {
+      text.each(function () {
+        var label = d3.select(this).text();
+        if (label.length > width) {
+          label = label.slice(0, width) + '...';
+        }
+        d3.select(this).text(label);
+      });
+    }
     // function to wrap text!
     function wrap(text, width) {
       text.each(function () {
@@ -132,23 +142,24 @@ export default class SvgHandler {
           if (finalPositions[d] == null) {
             return '';
           } else {
-            return finalPositions[d].org;
+            let label = finalPositions[d].name;
+            if (label.length > txtLength) {
+              label = label.slice(0, txtLength) + '...';
+            }
+            return label;
           }
         });
 
       var svg = d3.select('#' + container).transition();
       // redraw y axis
-      svg
-        .select('.yAxis')
-        .duration(750)
-        .call(rightAxis)
-        .selectAll('.tick-text')
-        .call(wrap, margin.right - 25);
+      svg.select('.yAxis').duration(750).call(rightAxis).selectAll('.tick text').attr('font-size', txtSize);
+      // .call(truncateLabel, txtLength);
+
       // Update lines and nodes
       for (var i = 0; i < parsedData.length; i++) {
         var currentData = parsedData[i].data;
         svg
-          .select('.org-' + i + container)
+          .select('.name-' + i + container)
           .duration(750)
           .attr('d', path(currentData));
         svg
@@ -225,7 +236,7 @@ export default class SvgHandler {
         if (finalPositions[d] == null) {
           return '';
         } else {
-          return finalPositions[d].org;
+          return finalPositions[d].name;
         }
       });
 
@@ -237,21 +248,23 @@ export default class SvgHandler {
       .attr('margin', 10)
       .attr('transform', 'translate(' + (width + margin.spacer) + ',' + margin.top + ')')
       .attr('class', 'yAxis')
-      .selectAll('.tick-text')
-      .call(wrap, margin.right - 25)
-      .attr('transform', 'translate(' + 10 + ',0)');
+      .selectAll('.tick text')
+      .attr('font-size', txtSize)
+      .attr('transform', 'translate(' + 10 + ',0)')
+      .call(truncateLabel, txtLength);
 
     svg
       .append('g')
       .call(bottomAxis)
       .attr('class', 'axis')
       .attr('transform', 'translate(' + margin.spacer + ',' + (height + margin.spacer + margin.top) + ')')
-      .selectAll('.tick-text')
-      .call(wrap, 100)
+      .selectAll('.tick text')
+      .attr('font-size', txtSize)
       .attr('transform', 'rotate(-60)')
-      .style('text-anchor', 'end');
+      .style('text-anchor', 'end')
+      .call(wrap, 100);
 
-    // Add axis title.  var header1 comes from options, default: Source Organizations
+    // Add axis title.  var header1 comes from options
     svg
       .append('text')
       .attr('class', 'header-text')
@@ -261,7 +274,17 @@ export default class SvgHandler {
       .text(header1);
 
     // For lines tooltip
-    var div = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
+    var div = d3
+      .select('body')
+      .append('div')
+      .attr('class', 'tooltip')
+      .style('background-color', theme.colors.background.primary)
+      .style('font-family', theme.typography.fontFamily.sansSerif)
+      .style('color', theme.colors.text.primary)
+      .style('box-shadow', '3px 3px 6px lightgray')
+      .style('border', 'none')
+      .style('padding', '5px')
+      .style('opacity', 0);
 
     // Add the lines
     for (let i = 0; i < parsedData.length; i++) {
@@ -274,7 +297,7 @@ export default class SvgHandler {
         .data(currentData)
         .attr('transform', 'translate(' + margin.spacer + ',' + margin.top + ')')
         .append('path')
-        .attr('class', 'org-' + i + container)
+        .attr('class', 'name-' + i + container)
 
         .attr('fill', 'none')
         .attr('stroke', colorPal[i % colorPal.length])
@@ -282,8 +305,8 @@ export default class SvgHandler {
         .attr('stroke-width', 7)
         .attr('d', path(currentData))
 
-        // Add Tootip and hover settings
-        .on('mouseover', function (d) {
+        // Add Tooltip and hover settings
+        .on('mouseover', function (event, d) {
           d3.selectAll('path').attr('opacity', 0.2);
           d3.select(this).attr('opacity', 1);
 
@@ -298,25 +321,32 @@ export default class SvgHandler {
               .attr('fill-opacity', dark ? 0.9 : 0.2);
           });
 
+          //like the mouseover above go ahead and render the text so we can calculate its size
+          //and position correctly.
           div.transition().duration(200).style('opacity', 0.9);
           div
             .html(() => {
-              var text = '<b>' + d.org + '</b>';
+              var text = `<p><b>${d.name}</b>`;
               return text;
-            })
-            .style('left', d3.event.pageX + 'px')
-            .style('top', d3.event.pageY - 28 + 'px');
+            });
+
+          var rect = event.target.getBoundingClientRect();
+          var divSize = div.node().getBoundingClientRect();
+
+          div
+            .style('left', rect.left + rect.width - divSize.width / 2 + 'px')
+            .style('top', rect.top - divSize.height - 5 + 'px')
+            .style('opacity', 1);
         })
         .on('mouseout', function (d) {
-          div.transition().duration(500).style('opacity', 0);
+          div.transition().duration(500).style('opacity', 0).attr('transform', 'translate(0, 0)');
           d3.selectAll('path').attr('opacity', startingOpacity);
           d3.selectAll('circle')
             .attr('fill-opacity', startingOpacity)
             .attr('opacity', startingOpacity + 0.2);
         });
 
-      ///////////////////////
-      // Add Nodes, set class to .org-<i>
+      // Add Nodes, set class to .name-<i>
       var node = svg
         .append('svg')
         .attr('width', width + 10 + margin.spacer)
@@ -327,7 +357,7 @@ export default class SvgHandler {
         .data(currentData)
         .enter()
         .append('circle')
-        .attr('class', 'org-' + i + container)
+        .attr('class', 'name-' + i + container)
         .attr('cx', function (d) {
           return x(d.date);
         })
@@ -344,11 +374,21 @@ export default class SvgHandler {
 
     ///////////////////////
     // point Tooltips
-    var tooltip = d3.select('body').append('div').attr('class', 'small-tooltip');
+    var tooltip = d3
+      .select('body')
+      .append('div')
+      .attr('class', 'tooltip')
+      .style('background-color', theme.colors.background.primary)
+      .style('font-family', theme.typography.fontFamily.sansSerif)
+      .style('color', theme.colors.text.primary)
+      .style('box-shadow', '3px 3px 6px lightgray')
+      .style('border', 'none')
+      .style('padding', '10px')
+      .style('opacity', '0');
 
     svg
       .selectAll('circle')
-      .on('mouseover', function (d) {
+      .on('mouseover', function (event, d) {
         let className = d3.select(this).attr('class');
 
         // Circles: selected opacity -> 1, all else -> 0.2
@@ -370,17 +410,21 @@ export default class SvgHandler {
         });
 
         div.transition().duration(200).style('opacity', 0.9);
+        div.html(() => {
+          var rank = d.rank + 1;
+          var text = `<b># ${rank}:</b> ${d.name} <br><b>${tooltipMetric}: </b> ${d.value} ${d.suffix}`;
+          return text;
+        });
+        var rect = event.target.getBoundingClientRect();
+        var divSize = div.node().getBoundingClientRect();
+
         div
-          .html(() => {
-            var rank = d.rank + 1;
-            var text = `<b># ${rank}:</b> ${d.org} <br><b>${tooltipMetric}: </b> ${d.value} ${d.suffix}`;
-            return text;
-          })
-          .style('left', d3.event.pageX + 'px')
-          .style('top', d3.event.pageY - 28 + 'px');
+          .style('left', rect.left + rect.width - divSize.width / 2 + 'px')
+          .style('top', rect.top - divSize.height - 5 + 'px')
+          .style('opacity', 1);
       })
       .on('mouseout', function (d) {
-        div.transition().duration(500).style('opacity', 0);
+        div.transition().duration(500).style('opacity', 0).attr('transform', 'translate(0, 0)');
         d3.selectAll('circle')
           .attr('fill-opacity', startingOpacity)
           .attr('opacity', startingOpacity + 0.2);
