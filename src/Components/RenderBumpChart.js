@@ -328,18 +328,19 @@ export default class SvgHandler {
             return text;
           });
 
-          var rect = event.target.getBoundingClientRect();
-          var divSize = div.node().getBoundingClientRect();
+          // var rect = event.target.getBoundingClientRect();
+          // var divSize = div.node().getBoundingClientRect();
 
           div
-            .style('left', rect.left + rect.width - divSize.width / 2 + 'px')
-            .style('top', rect.top - divSize.height - 5 + 'px')
+            .style('left', event.pageX + 15 + 'px')
+            .style('top', event.pageY - 10 + 'px')
             .transition()
             .duration(200)
             .style('opacity', 0.9);
         })
         .on('mouseout', function (d, i) {
-          div.transition().duration(500).style('opacity', 0).attr('transform', 'translate(0, 0)');
+          div.transition().duration(200).style('opacity', 0);
+          div.transition().delay(250).style('left', '0px').style('top', '0px');
           d3.selectAll('path').attr('opacity', startingOpacity);
           d3.selectAll('circle')
             .attr('fill-opacity', startingOpacity)
@@ -424,7 +425,8 @@ export default class SvgHandler {
           .style('opacity', 1);
       })
       .on('mouseout', function (d) {
-        div.transition().duration(500).style('opacity', 0).attr('transform', 'translate(0, 0)');
+        div.transition().duration(200).style('opacity', 0);
+        div.transition().delay(250).style('left', '0px').style('top', '0px');
         d3.selectAll('circle')
           .attr('fill-opacity', startingOpacity)
           .attr('opacity', startingOpacity + 0.2);
