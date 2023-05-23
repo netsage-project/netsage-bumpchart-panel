@@ -51,6 +51,9 @@ export default class SvgHandler {
       height = panelHeight - margin.top - margin.bottom;
 
     let upperWidth = width + margin.left + margin.right - 120; // dropdown width is 100
+    if (upperWidth < 0) { // don't let width be negative
+      upperWidth = 0;
+    }
 
     var path = d3
       .line()
