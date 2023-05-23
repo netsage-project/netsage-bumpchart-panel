@@ -57,7 +57,7 @@ export function ParseData(data) {
       return b.valueRaw - a.valueRaw;
     });
     for (var r = 0; r < tempArray.length; r++) {
-      parsedData[tempArray[r].originalIndex].data[i].rank = r;
+      parsedData[tempArray[r].originalIndex].data[i].rank = r; // assign rank
     }
   }
 

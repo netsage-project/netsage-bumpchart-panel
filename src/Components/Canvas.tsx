@@ -15,9 +15,9 @@ export const Canvas = (props: { panelId: any; data: any; options: {
 
     // data, ctrl, header1, header2
     if (props.data) {
-      chart.renderChart(props.data, props.options.headerText, props.options.linecount, props.options.tooltipMetric, theme, props.options.labelMargin, props.options.txtSize);
+      chart.renderChart(props.data, props.width, props.height, props.options.headerText, props.options.linecount, props.options.tooltipMetric, theme, props.options.labelMargin, props.options.txtSize);
     } else {
-      console.log('NO DATA');
+      console.error('NO DATA');
     }
   });
 

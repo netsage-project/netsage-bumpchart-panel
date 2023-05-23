@@ -5,7 +5,7 @@ export default class SvgHandler {
     this.containerID = id;
   }
 
-  renderChart(data, header1, numLines, tooltipMetric, theme, labelMargin, txtSize) {
+  renderChart(data, panelWidth, panelHeight, header1, numLines, tooltipMetric, theme, labelMargin, txtSize) {
     // SUPER IMPORTANT! This clears old chart before drawing new one...
     let panel = document.getElementById(this.containerID);
     panel.innerHTML = '';
@@ -43,12 +43,15 @@ export default class SvgHandler {
     let startingOpacity = 0.5;
     let dropdownOptions = [10, 9, 8, 7, 6, 5, 4, 3];
 
-    let panelWidth = document.getElementById(this.containerID).offsetWidth;
-    let panelHeight = document.getElementById(this.containerID).offsetHeight;
-
     var margin = { top: 25, right: labelMargin, bottom: 150, left: 25, spacer: 25 },
       width = panelWidth - margin.left - margin.right,
       height = panelHeight - margin.top - margin.bottom;
+
+      if (width <= 0 || height <= 0) {
+        console.error('panel too small, please resize');
+        return;
+      }
+
 
     let upperWidth = width + margin.left + margin.right - 120; // dropdown width is 100
     if (upperWidth < 0) { // don't let width be negative
