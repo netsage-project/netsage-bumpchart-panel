@@ -149,7 +149,7 @@ export default class SvgHandler {
             return '';
           } else {
             let label = finalPositions[d].name;
-            if (label.length > txtLength) {
+            if (label && label.length > txtLength) {
               label = label.slice(0, txtLength) + '...';
             }
             return label;
