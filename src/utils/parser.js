@@ -30,8 +30,8 @@ export function ParseData(data) {
     const thisName = row.name;
     const timeField = row.fields.find((field) => field.type === 'time');
     const valueField = row.fields.find((field) => field.type === 'number');
-    const timeValues = timeField.values.buffer;
-    const values = valueField.values.buffer;
+    const timeValues = timeField.values;
+    const values = valueField.values;
     let thisData = [];
     for (let i = 0; i < timeValues.length; i++) {
       let suffix = valueField.display(values[i]).suffix ? valueField.display(values[i]).suffix : '';
