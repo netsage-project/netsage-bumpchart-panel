@@ -1,3 +1,5 @@
+import { DataFrameView } from '@grafana/data';
+
 export function ParseData(data) {
   let alpha = 1;
 
@@ -20,40 +22,44 @@ export function ParseData(data) {
 
   let dataSeries = data.series;
   if (dataSeries.length == 0) {
+    console.error('no data');
     return [];
   }
   const display = dataSeries.map((series) => series.fields.find((field) => field.type === 'number'))[0].display;
-
   // extract raw data
   let parsedData = [];
-  dataSeries.forEach((row) => {
-    const thisName = row.name;
-    const timeField = row.fields.find((field) => field.type === 'time');
-    const valueField = row.fields.find((field) => field.type === 'number');
-    const timeValues = timeField.values;
-    const values = valueField.values;
+  dataSeries.forEach((line) => {
+    const frame = new DataFrameView(line);
+    const thisName = frame.data.name ? frame.data.name : frame.data.refId;
+    const thisIndex = dataSeries.indexOf(line);
+    const thisTimeField = frame.data.fields.find((field) => field.type === 'time');
+    const thisValueField = frame.data.fields.find((field) => field.type === 'number');
     let thisData = [];
-    for (let i = 0; i < timeValues.length; i++) {
-      let suffix = valueField.display(values[i]).suffix ? valueField.display(values[i]).suffix : '';
+    frame.forEach((row) => {
+      let suffix = thisValueField.display(row[thisValueField.name]).suffix
+        ? thisValueField.display(row[thisValueField.name]).suffix
+        : '';
       thisData.push({
-        date: timeValues[i],
-        valueRaw: values[i],
-        value: valueField.display(values[i]).text,
+        date: row[thisTimeField.name],
+        valueRaw: row[thisValueField.name],
+        value: thisValueField.display(row[thisValueField.name]).text,
         suffix: suffix,
         rank: 0,
-        originalIndex: parseInt(dataSeries.indexOf(row)),
+        originalIndex: thisIndex,
       });
-    }
+    });
     parsedData.push({ name: thisName, data: thisData });
   });
 
   // assign ranks to data
-  for (var i = 0; i < parsedData[0].data.length; i++) { // for each date
+  for (var i = 0; i < parsedData[0].data.length; i++) {
+    // for each date
     let tempArray = [];
     parsedData.forEach((row) => {
-      tempArray.push(row.data[i]);                     // collect data points for each row
-    })
-    tempArray.sort((a, b) => {                         // sort them by value
+      tempArray.push(row.data[i]); // collect data points for each row
+    });
+    tempArray.sort((a, b) => {
+      // sort them by value
       return b.valueRaw - a.valueRaw;
     });
     for (var r = 0; r < tempArray.length; r++) {
