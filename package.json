@@ -1,6 +1,6 @@
 {
   "name": "netsage-bumpchart-panel",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Bump Chart Panel Plugin",
   "scripts": {
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
