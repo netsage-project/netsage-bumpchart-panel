@@ -283,13 +283,16 @@ export default class SvgHandler {
     var div = d3
       .select('body')
       .append('div')
-      .attr('class', 'tooltip')
+      .attr('class', 'bump-tooltip')
       .style('background-color', theme.colors.background.primary)
       .style('font-family', theme.typography.fontFamily.sansSerif)
       .style('color', theme.colors.text.primary)
       .style('box-shadow', '3px 3px 6px lightgray')
       .style('border', 'none')
       .style('padding', '5px')
+      .style('z-index', '500')
+      .style('position', 'absolute')
+      .style('width', 'fit-content')
       .style('opacity', 0);
 
     // Add the lines
