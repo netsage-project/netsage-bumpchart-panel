@@ -17,12 +17,12 @@
     },
     "links": [
       {
-        "name": "Website",
-        "url": "https://github.com/grafana/simple-react-panel"
+        "name": "GitHub",
+        "url": "https://github.com/netsage-project/netsage-bumpchart-panel"
       },
       {
         "name": "License",
-        "url": "https://github.com/grafana/simple-react-panel/blob/master/LICENSE"
+        "url": "https://github.com/netsage-project/netsage-bumpchart-panel/blob/master/LICENSE"
       }
     ],
     "screenshots": [
@@ -35,7 +35,7 @@
     "updated": "%TODAY%"
   },
   "dependencies": {
-    "grafanaDependency": ">=8.3.0",
+    "grafanaDependency": ">=11.0.0",
     "plugins": []
   }
 }

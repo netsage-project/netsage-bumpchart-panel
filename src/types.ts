@@ -1,7 +1,8 @@
 export interface SimpleOptions {
-  linecount: number;
-  headerText: String;
-  tooltipMetric: String;
+  headerText: string;
+  linecount: string;
+  tooltipMetric: string;
   labelMargin: number;
   txtSize: number;
+  dateFormat: string;
 }

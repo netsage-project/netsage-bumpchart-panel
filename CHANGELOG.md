@@ -1,6 +1,4 @@
-# Change Log
-
-All notable changes to this project will be documented in this file.
+# Changelog
 
 ## v1.1.0
 
@@ -9,3 +7,9 @@ All notable changes to this project will be documented in this file.
 - Add text size option
 - Truncate labels if too long
 - Sorting bug fix
+
+## v2.0.0
+- complete refactor to better align with standard Grafana plugins
+- removed dropdown for number of lines (added template variable support for that instead)
+- might require a "join" transformation depending on your query
+- better toolip UX
