@@ -7,7 +7,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 node_modules/
-.config/
+
 
 # yarn
 .yarn/cache
