@@ -45,3 +45,5 @@ ci/
 .idea
 
 .eslintcache
+
+src/components/RenderBumpChart.js
