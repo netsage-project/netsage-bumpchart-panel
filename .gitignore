@@ -46,4 +46,3 @@ ci/
 
 .eslintcache
 
-src/components/RenderBumpChart.js
