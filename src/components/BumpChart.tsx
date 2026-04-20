@@ -3,7 +3,6 @@ import { FieldType, PanelData, PanelProps } from '@grafana/data';
 import { Tooltip, useTheme2 } from '@grafana/ui';
 import { SimpleOptions } from 'types';
 import SvgHandler from './RenderBumpChart';
-import './styles.css';
 
 interface Props extends PanelProps<SimpleOptions> {}
 
