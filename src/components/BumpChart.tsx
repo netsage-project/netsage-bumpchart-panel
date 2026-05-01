@@ -98,7 +98,7 @@ export const BumpChart: React.FC<Props> = ({ options, data, width, height, id, r
       return;
     }
 
-    const numLines = parseInt(replaceVariables(options.linecount), 10);
+    const numLines = parseInt(replaceVariables(String(options.linecount)), 10);
 
     const chart = new SvgHandler('Chart_' + id);
     chart.renderChart(
