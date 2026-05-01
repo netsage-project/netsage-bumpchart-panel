@@ -36,7 +36,6 @@ export default class SvgHandler {
     let finalPositions = data.finalPositions;
     let colorPal = data.colorPal;
     let dates = data.dates;
-    console.log(dates)
 
     let display = data.display;
     let txtLength = Math.floor((labelMargin - 10) / (txtSize * 0.75));
