@@ -1,11 +1,11 @@
-import * as d3 from '../d3.min.js';
+import * as d3 from 'd3';
 
 export default class SvgHandler {
   constructor(id) {
     this.containerID = id;
   }
 
-  renderChart(data, panelWidth, panelHeight, header1, numLines, tooltipMetric, theme, labelMargin, txtSize) {
+  renderChart(data, panelWidth, panelHeight, header1, numLines, tooltipMetric, theme, labelMargin, txtSize, dateFormat, onMouseOver, onMouseOut) {
     // SUPER IMPORTANT! This clears old chart before drawing new one...
     let panel = document.getElementById(this.containerID);
     panel.innerHTML = '';
@@ -36,6 +36,7 @@ export default class SvgHandler {
     let finalPositions = data.finalPositions;
     let colorPal = data.colorPal;
     let dates = data.dates;
+
     let display = data.display;
     let txtLength = Math.floor((labelMargin - 10) / (txtSize * 0.75));
 
@@ -78,9 +79,6 @@ export default class SvgHandler {
     // number top talkers to display
     var yAxisMax = numLines - 1; // var numLines set in Viz tab, default: 10
     var dataYrange = [0, yAxisMax];
-
-    // timestamp formatter
-    var dateFormat = d3.timeFormat('%m/%d/%y');
 
     // Add X scale
     var x = d3.scaleTime().domain(dataXrange).range([0, width]);
@@ -158,7 +156,7 @@ export default class SvgHandler {
 
       var svg = d3.select('#' + container).transition();
       // redraw y axis
-      svg.select('.yAxis').duration(750).call(rightAxis).selectAll('.tick text').attr('font-size', txtSize);
+      svg.select('.yAxis').duration(500).call(rightAxis).selectAll('.tick text').attr('font-size', txtSize);
       // .call(truncateLabel, txtLength);
 
       // Update lines and nodes
@@ -166,11 +164,11 @@ export default class SvgHandler {
         var currentData = parsedData[i].data;
         svg
           .select('.name-' + i + container)
-          .duration(750)
+          .duration(500)
           .attr('d', path(currentData));
         svg
           .selectAll('circle')
-          .duration(750)
+          .duration(500)
           .attr('cx', function (d) {
             return x(d.date);
           })
@@ -182,44 +180,44 @@ export default class SvgHandler {
 
     ///////////////////////////// Dropdown ////////////////////////////
     // Create dropdown
-    var dropdown = d3
-      .select('#' + container)
-      .insert('select', 'svg')
-      .on('change', function (d) {
-        // recover the option that has been chosen
-        var selectedOption = d3.select(this).property('value');
+    // var dropdown = d3
+    //   .select('#' + container)
+    //   .insert('select', 'svg')
+    //   .on('change', function (d) {
+    //     // recover the option that has been chosen
+    //     var selectedOption = d3.select(this).property('value');
 
-        // run the updateChart function with this selected option
-        update(selectedOption);
-      });
+    //     // run the updateChart function with this selected option
+    //     update(selectedOption);
+    //   });
 
-    dropdown
-      .selectAll('option')
-      .data(dropdownOptions)
-      .enter()
-      .append('option')
-      .text(function (d) {
-        return d;
-      }) // text showed in the menu
-      .attr('value', function (d) {
-        return d;
-      }); // corresponding value returned by the button;
+    // dropdown
+    //   .selectAll('option')
+    //   .data(dropdownOptions)
+    //   .enter()
+    //   .append('option')
+    //   .text(function (d) {
+    //     return d;
+    //   }) // text showed in the menu
+    //   .attr('value', function (d) {
+    //     return d;
+    //   }); // corresponding value returned by the button;
 
-    d3.selectAll('select').attr('class', 'dropdownMenu');
+    // d3.selectAll('select').attr('class', 'dropdownMenu');
 
-    var dropdownLabel = d3
-      .select('#' + container)
-      .insert('svg', 'svg')
-      .attr('width', upperWidth)
-      .attr('height', 30);
+    // var dropdownLabel = d3
+    //   .select('#' + container)
+    //   .insert('svg', 'svg')
+    //   .attr('width', upperWidth)
+    //   .attr('height', 30);
 
-    dropdownLabel
-      .append('text')
-      // .attr('class', 'dropdown-text')
-      .attr('transform', 'translate(' + upperWidth + ', 20)')
-      .style('text-anchor', 'end')
-      .style('fill', theme.colors.text.primary)
-      .text('Number of Lines to Display:');
+    // dropdownLabel
+    //   .append('text')
+    //   // .attr('class', 'dropdown-text')
+    //   .attr('transform', 'translate(' + upperWidth + ', 20)')
+    //   .style('text-anchor', 'end')
+    //   .style('fill', theme.colors.text.primary)
+    //   .text('Number of Lines to Display:');
 
     //////////////////////////////// Bump Chart ////////////////////////////////////////
 
@@ -246,7 +244,7 @@ export default class SvgHandler {
         }
       });
 
-    var bottomAxis = d3.axisBottom(x).tickValues(dates).tickSize(5).tickFormat(dateFormat);
+    var bottomAxis = d3.axisBottom(x).tickValues(dates).tickSize(5).tickFormat(d3.timeFormat(dateFormat));
 
     svg
       .append('g')
@@ -278,22 +276,6 @@ export default class SvgHandler {
       .style('text-anchor', 'start')
       .style('fill', theme.colors.text.primary)
       .text(header1);
-
-    // For lines tooltip
-    var div = d3
-      .select('body')
-      .append('div')
-      .attr('class', 'bump-tooltip')
-      .style('background-color', theme.colors.background.primary)
-      .style('font-family', theme.typography.fontFamily.sansSerif)
-      .style('color', theme.colors.text.primary)
-      .style('box-shadow', '3px 3px 6px lightgray')
-      .style('border', 'none')
-      .style('padding', '5px')
-      .style('z-index', '500')
-      .style('position', 'absolute')
-      .style('width', 'fit-content')
-      .style('opacity', 0);
 
     // Add the lines
     for (let i = 0; i < parsedData.length; i++) {
@@ -329,31 +311,14 @@ export default class SvgHandler {
               .attr('opacity', dark ? 1 : 0.2)
               .attr('fill-opacity', dark ? 0.9 : 0.2);
           });
-
-          // create div text
-          // div.transition().duration(200).style('opacity', 0.9);
-          div.html(() => {
-            var text = `<p><b>${d.name}</b>`;
-            return text;
-          });
-
-          // var rect = event.target.getBoundingClientRect();
-          // var divSize = div.node().getBoundingClientRect();
-
-          div
-            .style('left', event.pageX + 15 + 'px')
-            .style('top', event.pageY - 10 + 'px')
-            .transition()
-            .duration(200)
-            .style('opacity', 0.9);
+          onMouseOver(d.name, event.clientX, event.clientY);
         })
-        .on('mouseout', function (d, i) {
-          div.transition().duration(200).style('opacity', 0);
-          div.transition().delay(250).style('left', '0px').style('top', '0px');
+        .on('mouseout', function () {
           d3.selectAll('path').attr('opacity', startingOpacity);
           d3.selectAll('circle')
             .attr('fill-opacity', startingOpacity)
             .attr('opacity', startingOpacity + 0.2);
+          onMouseOut();
         });
 
       // Add Nodes, set class to .name-<i>
@@ -384,18 +349,6 @@ export default class SvgHandler {
 
     ///////////////////////
     // point Tooltips
-    var tooltip = d3
-      .select('body')
-      .append('div')
-      .attr('class', 'tooltip')
-      .style('background-color', theme.colors.background.primary)
-      .style('font-family', theme.typography.fontFamily.sansSerif)
-      .style('color', theme.colors.text.primary)
-      .style('box-shadow', '3px 3px 6px lightgray')
-      .style('border', 'none')
-      .style('padding', '10px')
-      .style('opacity', '0');
-
     svg
       .selectAll('circle')
       .on('mouseover', function (event, d) {
@@ -419,27 +372,17 @@ export default class SvgHandler {
           d3.select(this).attr('opacity', dark ? 1 : 0.2);
         });
 
-        div.transition().duration(200).style('opacity', 0.9);
-        div.html(() => {
-          var rank = d.rank + 1;
-          var text = `<b># ${rank}:</b> ${d.name} <br><b>${tooltipMetric}: </b> ${d.value} ${d.suffix}`;
-          return text;
-        });
-        var rect = event.target.getBoundingClientRect();
-        var divSize = div.node().getBoundingClientRect();
-
-        div
-          .style('left', rect.left + rect.width - divSize.width / 2 + 'px')
-          .style('top', rect.top - divSize.height - 5 + 'px')
-          .style('opacity', 1);
+        var rank = d.rank + 1;
+        let valueText = display(d.value).text;
+        let suffix = display(d.value).suffix ?? '';
+        onMouseOver(`#${rank}: ${d.name} \n ${tooltipMetric}: ${valueText} ${suffix}`, event.clientX, event.clientY);
       })
-      .on('mouseout', function (d) {
-        div.transition().duration(200).style('opacity', 0);
-        div.transition().delay(250).style('left', '0px').style('top', '0px');
+      .on('mouseout', function () {
         d3.selectAll('circle')
           .attr('fill-opacity', startingOpacity)
           .attr('opacity', startingOpacity + 0.2);
         d3.selectAll('path').attr('opacity', startingOpacity);
+        onMouseOut();
       });
   }
 }

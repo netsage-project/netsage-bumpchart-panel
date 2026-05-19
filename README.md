@@ -15,7 +15,7 @@ The plugin sorts the groups by value and displays the top N number of groups as 
 ## Customizing
 **Number of Lines**: The number of lines to display by default on the bumpchart.  Make sure the query provides AT LEAST this many data groups or it won't work.  In the example above, the number of lines chosen was 10, but the query returned the Top 50 results, which is why some of the lines drop in and out of the top 10 over time.
 
-**Axis Header**: The Header for the vertical axis showing all the labels.  In the example above, "Organization" is the header.
+**Axis Header**: The Header for the vertical axis on the right showing all the labels.  In the example above, "Organization" is the header.
 
 **Tooltip text for value**: The text that will show up in the tooltip to describe the value.
 
@@ -25,4 +25,4 @@ The plugin sorts the groups by value and displays the top N number of groups as 
 
 **Interval**: Whatever interval you set for your time series data will be the size of the bins for the bumpchart. In the example above, 2 weeks was chosen for the interval.
 
-
+**Date Time Format**: This currently has 3 options, "Date only" shows the date in MM/DD/YY format, "Time only" gives only the time in 24hr format and "Date & Time" gives both as MM/DD HH:MM
