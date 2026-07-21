@@ -12,6 +12,7 @@ export default class SvgHandler {
     txtSize: number,
     dateFormat: string,
     onMouseOver: (content: string, clientX: number, clientY: number) => void,
-    onMouseOut: () => void
+    onMouseOut: () => void,
+    opts?: { nodeSizeByValue?: boolean; lineWidth?: number }
   ): void;
 }

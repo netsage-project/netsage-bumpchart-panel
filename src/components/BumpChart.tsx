@@ -1,18 +1,22 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { FieldType, PanelData, PanelProps } from '@grafana/data';
+import { FieldType, GrafanaTheme2, PanelData, PanelProps } from '@grafana/data';
 import { Tooltip, useTheme2 } from '@grafana/ui';
 import { SimpleOptions } from 'types';
 import SvgHandler from './RenderBumpChart';
 
 interface Props extends PanelProps<SimpleOptions> {}
 
-const COLOR_PALETTE = [
-  '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
-  '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf',
-  '#aec7e8', '#ffbb78', '#98df8a', '#ff9896', '#c5b0d5',
+// Validated, colorblind-safe categorical palette (dataviz reference). Assigned in a
+// fixed order by final rank and NEVER cycled — entities beyond these hues fall back
+// to a neutral gray so two different series can never share a color.
+const PALETTE_LIGHT = [
+  '#2a78d6', '#1baf7a', '#eda100', '#008300', '#4a3aa7', '#e34948', '#e87ba4', '#eb6834',
+];
+const PALETTE_DARK = [
+  '#3987e5', '#199e70', '#c98500', '#008300', '#9085e9', '#e66767', '#d55181', '#d95926',
 ];
 
-function transformData(panelData: PanelData) {
+function transformData(panelData: PanelData, theme: GrafanaTheme2) {
   if (!panelData.series.length) {
     return null;
   }
@@ -20,13 +24,16 @@ function transformData(panelData: PanelData) {
   const frame = panelData.series[0];
   const timeField = frame.fields.find((f) => f.type === FieldType.time);
   const valueFields = frame.fields.filter((f) => f.type === FieldType.number);
-  const valueDisplay = valueFields[0].display;
 
   if (!timeField || !valueFields.length) {
     return null;
   }
 
+  const valueDisplay = valueFields[0].display;
   const numPoints = timeField.values.length;
+  if (numPoints === 0) {
+    return null;
+  }
   const dates: Date[] = Array.from({ length: numPoints }, (_, i) => new Date(timeField.values[i]));
 
   // For each timestamp, rank entities by value descending (higher value = rank 0 = top)
@@ -41,7 +48,22 @@ function transformData(panelData: PanelData) {
     ranksByTime.push(ranks);
   }
 
+  // Color follows entity identity, assigned by final rank so #1 gets the first slot.
+  // A user-set Grafana Color field override wins over the palette slot.
+  const palette = theme.isDark ? PALETTE_DARK : PALETTE_LIGHT;
+  const overflowColor = theme.colors.text.secondary;
+  const finalRankOf = (entityIdx: number) => ranksByTime[numPoints - 1][entityIdx];
+  const colorForField = (field: (typeof valueFields)[number], entityIdx: number): string => {
+    const override = field.config?.color;
+    if (override?.mode === 'fixed' && override.fixedColor) {
+      return theme.visualization.getColorByName(override.fixedColor);
+    }
+    const rank = finalRankOf(entityIdx);
+    return rank < palette.length ? palette[rank] : overflowColor;
+  };
+
   const parsedData = valueFields.map((field, entityIdx) => ({
+    color: colorForField(field, entityIdx),
     data: Array.from({ length: numPoints }, (_, t) => ({
       date: dates[t],
       rank: ranksByTime[t][entityIdx],
@@ -50,20 +72,43 @@ function transformData(panelData: PanelData) {
     })),
   }));
 
-
-  // finalPositions: indexed by rank at the last timestamp, value is { name }
+  // finalPositions / initialPositions: indexed by rank at the last / first timestamp
   const finalPositions: Array<{ name: string } | null> = new Array(valueFields.length).fill(null);
+  const initialPositions: Array<{ name: string } | null> = new Array(valueFields.length).fill(null);
   valueFields.forEach((field, entityIdx) => {
-    const finalRank = ranksByTime[numPoints - 1][entityIdx];
-    finalPositions[finalRank] = { name: field.name };
+    finalPositions[ranksByTime[numPoints - 1][entityIdx]] = { name: field.name };
+    initialPositions[ranksByTime[0][entityIdx]] = { name: field.name };
   });
+
+  // Global value extent for node-size scaling.
+  let valueMin = Infinity;
+  let valueMax = -Infinity;
+  valueFields.forEach((field) => {
+    for (let t = 0; t < numPoints; t++) {
+      const v = field.values[t];
+      if (v == null || Number.isNaN(v)) {
+        continue;
+      }
+      if (v < valueMin) {
+        valueMin = v;
+      }
+      if (v > valueMax) {
+        valueMax = v;
+      }
+    }
+  });
+  if (!Number.isFinite(valueMin)) {
+    valueMin = 0;
+    valueMax = 0;
+  }
 
   return {
     parsedData,
     finalPositions,
-    colorPal: COLOR_PALETTE,
+    initialPositions,
     dates,
     display: valueDisplay,
+    valueExtent: [valueMin, valueMax] as [number, number],
   };
 }
 
@@ -92,7 +137,7 @@ export const BumpChart: React.FC<Props> = ({ options, data, width, height, id, r
   }, []);
 
   useEffect(() => {
-    const chartData = transformData(data);
+    const chartData = transformData(data, theme);
     if (!chartData) {
       console.error('NO DATA');
       return;
@@ -113,7 +158,11 @@ export const BumpChart: React.FC<Props> = ({ options, data, width, height, id, r
       options.txtSize,
       options.dateFormat,
       onMouseOver,
-      onMouseOut
+      onMouseOut,
+      {
+        nodeSizeByValue: options.nodeSizeByValue,
+        lineWidth: options.lineWidth,
+      }
     );
   }, [data, width, height, options, theme, id, replaceVariables, onMouseOver, onMouseOut]);
 
