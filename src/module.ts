@@ -16,8 +16,7 @@ export const plugin = new PanelPlugin<SimpleOptions>(BumpChart)
     FieldConfigProperty.Max,
     FieldConfigProperty.Min,
     FieldConfigProperty.DisplayName,
-    FieldConfigProperty.Thresholds,
-    FieldConfigProperty.Color
+    FieldConfigProperty.Thresholds
   ],
     standardOptions: buildStandardOptions(),
   })
@@ -65,5 +64,11 @@ export const plugin = new PanelPlugin<SimpleOptions>(BumpChart)
       name: 'Text Size (px)',
       description: 'Font size for axis tick labels',
       defaultValue: 12,
+    })
+    .addNumberInput({
+      path: 'lineWidth',
+      name: 'Line Width (px)',
+      description: 'Thickness of the connecting lines (nodes scale with it)',
+      defaultValue: 6,
     });
 });

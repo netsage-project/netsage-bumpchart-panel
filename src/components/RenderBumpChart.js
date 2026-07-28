@@ -5,7 +5,25 @@ export default class SvgHandler {
     this.containerID = id;
   }
 
-  renderChart(data, panelWidth, panelHeight, header1, numLines, tooltipMetric, theme, labelMargin, txtSize, dateFormat, onMouseOver, onMouseOut) {
+  renderChart(
+    data,
+    panelWidth,
+    panelHeight,
+    header1,
+    numLines,
+    tooltipMetric,
+    theme,
+    labelMargin,
+    txtSize,
+    formatDate,
+    onMouseOver,
+    onMouseOut,
+    opts = {}
+  ) {
+    const lineWidth = opts.lineWidth != null ? opts.lineWidth : 6;
+    // Every node is the same size; it reads as a slight thickening of its own line.
+    const nodeRadius = lineWidth * 0.75;
+
     // SUPER IMPORTANT! This clears old chart before drawing new one...
     let panel = document.getElementById(this.containerID);
     panel.innerHTML = '';
@@ -13,53 +31,65 @@ export default class SvgHandler {
       .selectAll('svg')
       .remove();
     d3.select('#' + this.containerID)
-      .selectAll('.dropdownMenu')
-      .remove();
-    d3.select('#' + this.containerID)
       .selectAll('.tooltip')
       .remove();
     // ----------------------------------------------------------
-    if (data.length == 0) {
-      panel.innerHTML += 'No Data';
-      console.error('no data');
-      return;
-    }
-
-    //if not enough data for specified number, use all data
-    if (data.length < numLines) {
-      numLines = data.length;
-    }
 
     // ------------------- Variables -------------------
 
     let parsedData = data.parsedData;
     let finalPositions = data.finalPositions;
-    let colorPal = data.colorPal;
+    let initialPositions = data.initialPositions;
     let dates = data.dates;
+
+    if (!parsedData || parsedData.length === 0) {
+      panel.innerHTML += 'No Data';
+      console.error('no data');
+      return;
+    }
+
+    // if not enough data for specified number (or an invalid count), use all data
+    if (!Number.isFinite(numLines) || numLines <= 0 || parsedData.length < numLines) {
+      numLines = parsedData.length;
+    }
 
     let display = data.display;
     let txtLength = Math.floor((labelMargin - 10) / (txtSize * 0.75));
 
     let container = this.containerID;
-    let startingOpacity = 0.5;
-    let dropdownOptions = [10, 9, 8, 7, 6, 5, 4, 3];
+    // Lines and nodes share one opacity, so crossings stay readable through each other.
+    let baseOpacity = 0.65;
 
-    var margin = { top: 25, right: labelMargin, bottom: 150, left: 25, spacer: 25 },
+    // Theme tokens so lines, nodes, axes and text all adapt to light/dark.
+    let textColor = theme.colors.text.primary;
+    let mutedColor = theme.colors.text.secondary;
+    let gridColor = theme.colors.border.weak;
+    let fontFamily = theme.typography.fontFamily;
+
+    // Both left and right margins reserve room for end labels. The bottom margin
+    // holds the horizontal time axis + its labels; it must clear top + spacer +
+    // label height, or the axis gets cut off by the panel's bottom edge.
+    const marginTop = 25;
+    const marginSpacer = 25;
+    const marginBottom = marginTop + marginSpacer + txtSize + 12;
+    let margin = { top: marginTop, right: labelMargin, bottom: marginBottom, left: labelMargin, spacer: marginSpacer },
       width = panelWidth - margin.left - margin.right,
       height = panelHeight - margin.top - margin.bottom;
 
-      if (width <= 0 || height <= 0) {
-        console.error('panel too small, please resize');
-        return;
-      }
-
-
-    let upperWidth = width + margin.left + margin.right - 120; // dropdown width is 100
-    if (upperWidth < 0) { // don't let width be negative
-      upperWidth = 0;
+    if (width <= 0 || height <= 0) {
+      console.error('panel too small, please resize');
+      return;
     }
 
-    var path = d3
+    // Precompute rank change vs the previous timestamp for richer tooltips.
+    for (let i = 0; i < parsedData.length; i++) {
+      const series = parsedData[i].data;
+      for (let t = 0; t < series.length; t++) {
+        series[t].delta = t === 0 ? null : series[t - 1].rank - series[t].rank;
+      }
+    }
+
+    let path = d3
       .line()
       .x(function (d) {
         return x(d.date);
@@ -72,189 +102,102 @@ export default class SvgHandler {
     // ------------------- Ranges & Scales --------------------
 
     // the date range of available data:
-    var dataXrange = d3.extent(parsedData[0].data, function (d) {
+    let dataXrange = d3.extent(parsedData[0].data, function (d) {
       return d.date;
     });
 
     // number top talkers to display
-    var yAxisMax = numLines - 1; // var numLines set in Viz tab, default: 10
-    var dataYrange = [0, yAxisMax];
+    let yAxisMax = numLines - 1; // var numLines set in Viz tab, default: 10
+    let dataYrange = [0, yAxisMax];
 
     // Add X scale
-    var x = d3.scaleTime().domain(dataXrange).range([0, width]);
+    let x = d3.scaleTime().domain(dataXrange).range([0, width]);
 
     // Add Y scale
-    var y = d3.scaleLinear().domain(dataYrange).range([0, height]);
+    let y = d3.scaleLinear().domain(dataYrange).range([0, height]);
 
     // ------------------- FUNCTIONS -------------------
     function truncateLabel(text, width) {
       text.each(function () {
-        var label = d3.select(this).text();
+        let label = d3.select(this).text();
         if (label.length > width) {
           label = label.slice(0, width) + '...';
         }
         d3.select(this).text(label);
       });
     }
-    // function to wrap text!
-    function wrap(text, width) {
-      text.each(function () {
-        var text = d3.select(this),
-          words = text.text().split(/\s+/).reverse(),
-          word,
-          line = [],
-          lineNumber = 0,
-          lineHeight = 1.1, // ems
-          y = text.attr('y'),
-          dy = parseFloat(text.attr('dy')),
-          tspan = text
-            .text(null)
-            .append('tspan')
-            .attr('x', 0)
-            .attr('y', y)
-            .attr('dy', dy + 'em');
-        while ((word = words.pop())) {
-          line.push(word);
-          tspan.text(line.join(' '));
-          if (tspan.node().getComputedTextLength() > width) {
-            line.pop();
-            tspan.text(line.join(' '));
-            line = [word];
-            tspan = text
-              .append('tspan')
-              .attr('x', 0)
-              .attr('y', y)
-              .attr('dy', ++lineNumber * lineHeight + dy + 'em')
-              .text(word);
-          }
-        }
-      });
-    }
-
-    // A function that updates the chart
-    function update(dropdownSelection) {
-      // update variables
-      yAxisMax = dropdownSelection - 1;
-      dataYrange = [0, yAxisMax];
-      y.domain(dataYrange);
-
-      rightAxis = d3
-        .axisRight(y)
-        .ticks(dropdownSelection)
-        .tickSize(5)
-        .tickFormat((d) => {
-          if (finalPositions[d] == null) {
-            return '';
-          } else {
-            let label = finalPositions[d].name;
-            if (label && label.length > txtLength) {
-              label = label.slice(0, txtLength) + '...';
-            }
-            return label;
-          }
-        });
-
-      var svg = d3.select('#' + container).transition();
-      // redraw y axis
-      svg.select('.yAxis').duration(500).call(rightAxis).selectAll('.tick text').attr('font-size', txtSize);
-      // .call(truncateLabel, txtLength);
-
-      // Update lines and nodes
-      for (var i = 0; i < parsedData.length; i++) {
-        var currentData = parsedData[i].data;
-        svg
-          .select('.name-' + i + container)
-          .duration(500)
-          .attr('d', path(currentData));
-        svg
-          .selectAll('circle')
-          .duration(500)
-          .attr('cx', function (d) {
-            return x(d.date);
-          })
-          .attr('cy', function (d) {
-            return y(d.rank);
-          });
-      }
-    }
-
-    ///////////////////////////// Dropdown ////////////////////////////
-    // Create dropdown
-    // var dropdown = d3
-    //   .select('#' + container)
-    //   .insert('select', 'svg')
-    //   .on('change', function (d) {
-    //     // recover the option that has been chosen
-    //     var selectedOption = d3.select(this).property('value');
-
-    //     // run the updateChart function with this selected option
-    //     update(selectedOption);
-    //   });
-
-    // dropdown
-    //   .selectAll('option')
-    //   .data(dropdownOptions)
-    //   .enter()
-    //   .append('option')
-    //   .text(function (d) {
-    //     return d;
-    //   }) // text showed in the menu
-    //   .attr('value', function (d) {
-    //     return d;
-    //   }); // corresponding value returned by the button;
-
-    // d3.selectAll('select').attr('class', 'dropdownMenu');
-
-    // var dropdownLabel = d3
-    //   .select('#' + container)
-    //   .insert('svg', 'svg')
-    //   .attr('width', upperWidth)
-    //   .attr('height', 30);
-
-    // dropdownLabel
-    //   .append('text')
-    //   // .attr('class', 'dropdown-text')
-    //   .attr('transform', 'translate(' + upperWidth + ', 20)')
-    //   .style('text-anchor', 'end')
-    //   .style('fill', theme.colors.text.primary)
-    //   .text('Number of Lines to Display:');
 
     //////////////////////////////// Bump Chart ////////////////////////////////////////
 
     // append the svg object to the body of the page
-    var svg = d3
+    let rootSvg = d3
       .select('#' + this.containerID)
       .append('svg')
       .attr('width', width + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom + margin.spacer)
+      .attr('height', height + margin.top + margin.bottom)
+      .style('font-family', fontFamily);
+
+    let svg = rootSvg
       .append('g')
       .attr('height', height)
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-    // Add axes
-    var rightAxis = d3
+    // Right axis: final rank labels, prefixed with rank number.
+    // tickValues (not ticks) so every rank 0..numLines-1 gets exactly one label.
+    let rightAxis = d3
       .axisRight(y)
-      .ticks(numLines - 1)
+      .tickValues(d3.range(numLines))
       .tickSize(5)
       .tickFormat((d) => {
         if (finalPositions[d] == null) {
           return '';
-        } else {
-          return finalPositions[d].name;
         }
+        return `#${d + 1} ${finalPositions[d].name}`;
       });
 
-    var bottomAxis = d3.axisBottom(x).tickValues(dates).tickSize(5).tickFormat(d3.timeFormat(dateFormat));
+    // Left axis: starting rank labels so each line can be traced end to end.
+    let leftAxis = d3
+      .axisLeft(y)
+      .tickValues(d3.range(numLines))
+      .tickSize(5)
+      .tickFormat((d) => {
+        if (initialPositions[d] == null) {
+          return '';
+        }
+        return initialPositions[d].name;
+      });
+
+    // Bottom time axis: horizontal, with ticks on the actual data timestamps (thinned to
+    // fit the width) so each label sits under a real column of nodes. Letting d3 pick
+    // "nice" times instead would align them to the *browser's* midnight, which drifts off
+    // the buckets on any dashboard not in local time. formatDate renders each tick in the
+    // dashboard's timezone.
+    let maxTicks = Math.max(2, Math.floor(width / 90));
+    let tickStep = Math.max(1, Math.ceil(dates.length / maxTicks));
+    let tickValues = dates.filter((_, i) => i % tickStep === 0);
+    let bottomAxis = d3.axisBottom(x).tickValues(tickValues).tickSize(5).tickFormat(formatDate);
 
     svg
       .append('g')
       .call(rightAxis)
-      .attr('margin', 10)
       .attr('transform', 'translate(' + (width + margin.spacer) + ',' + margin.top + ')')
       .attr('class', 'yAxis')
       .selectAll('.tick text')
       .attr('font-size', txtSize)
+      .attr('fill', textColor)
+      .style('font-variant-numeric', 'tabular-nums')
       .attr('transform', 'translate(' + 10 + ',0)')
+      .call(truncateLabel, txtLength + 4);
+
+    svg
+      .append('g')
+      .call(leftAxis)
+      .attr('transform', 'translate(' + margin.spacer + ',' + margin.top + ')')
+      .attr('class', 'yAxisLeft')
+      .selectAll('.tick text')
+      .attr('font-size', txtSize)
+      .attr('fill', textColor)
+      .attr('transform', 'translate(' + -10 + ',0)')
       .call(truncateLabel, txtLength);
 
     svg
@@ -264,23 +207,66 @@ export default class SvgHandler {
       .attr('transform', 'translate(' + margin.spacer + ',' + (height + margin.spacer + margin.top) + ')')
       .selectAll('.tick text')
       .attr('font-size', txtSize)
-      .attr('transform', 'rotate(-60)')
-      .style('text-anchor', 'end')
-      .call(wrap, 100);
+      .attr('fill', mutedColor)
+      .style('text-anchor', 'middle');
 
-    // Add axis title.  var header1 comes from options
+    // Add axis title above the right (final-rank) axis.  var header1 comes from options
     svg
       .append('text')
       .attr('class', 'header-text')
-      .attr('transform', 'translate(' + (width + margin.left + 10) + ' ,' + margin.top / 4 + ')')
+      .attr('transform', 'translate(' + (width + margin.spacer) + ' ,' + margin.top / 4 + ')')
       .style('text-anchor', 'start')
-      .style('fill', theme.colors.text.primary)
+      .style('fill', textColor)
       .text(header1);
+
+    // Crosshair: a vertical rule that snaps to the nearest timestamp on hover.
+    let crosshairGroup = svg
+      .append('g')
+      .attr('transform', 'translate(' + margin.spacer + ',' + margin.top + ')')
+      .style('pointer-events', 'none');
+    let crosshair = crosshairGroup
+      .append('line')
+      .attr('class', 'crosshair')
+      .attr('y1', 0)
+      .attr('y2', height)
+      .attr('stroke', gridColor)
+      .attr('stroke-width', 1)
+      .attr('stroke-dasharray', '4 3')
+      .style('opacity', 0);
+
+    const nearestDate = (target) => {
+      let best = dates[0];
+      let bestDist = Infinity;
+      for (const d of dates) {
+        const dist = Math.abs(d.getTime() - target.getTime());
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = d;
+        }
+      }
+      return best;
+    };
+
+    rootSvg
+      .on('mousemove', function (event) {
+        const px = d3.pointer(event, this)[0] - margin.left - margin.spacer;
+        if (px < 0 || px > width) {
+          crosshair.style('opacity', 0);
+          return;
+        }
+        const snapped = nearestDate(x.invert(px));
+        crosshair.attr('x1', x(snapped)).attr('x2', x(snapped)).style('opacity', 0.9);
+      })
+      .on('mouseleave', function () {
+        crosshair.style('opacity', 0);
+      });
 
     // Add the lines
     for (let i = 0; i < parsedData.length; i++) {
-      var currentData = parsedData[i].data;
-      var line = svg
+      let currentData = parsedData[i].data;
+      let seriesColor = parsedData[i].color;
+
+      let line = svg
         .append('svg')
         .attr('width', width + margin.spacer)
         .attr('height', height + margin.spacer + margin.top)
@@ -289,40 +275,51 @@ export default class SvgHandler {
         .attr('transform', 'translate(' + margin.spacer + ',' + margin.top + ')')
         .append('path')
         .attr('class', 'name-' + i + container)
-
+        .attr('data-role', 'line')
         .attr('fill', 'none')
-        .attr('stroke', colorPal[i % colorPal.length])
-        .attr('opacity', startingOpacity)
-        .attr('stroke-width', 7)
+        .attr('stroke', seriesColor)
+        .attr('opacity', baseOpacity)
+        .attr('stroke-width', lineWidth)
+        .attr('stroke-linejoin', 'round')
+        .attr('stroke-linecap', 'round')
         .attr('d', path(currentData))
 
         // Add Tooltip and hover settings
         .on('mouseover', function (event, d) {
-          d3.selectAll('path').attr('opacity', 0.2);
+          d3.selectAll('#' + container + ' path[data-role="line"]').attr('opacity', 0.2);
           d3.select(this).attr('opacity', 1);
 
           // Circles: selected opacity -> 1, all else -> 0.2
           let className = d3.select(this).attr('class');
-          d3.selectAll('circle').each(function (d) {
-            var thisClass = d3.select(this).attr('class');
-            var dark = className === thisClass;
+          d3.selectAll('#' + container + ' circle').each(function () {
+            let thisClass = d3.select(this).attr('class');
+            let dark = className === thisClass;
 
-            d3.select(this)
-              .attr('opacity', dark ? 1 : 0.2)
-              .attr('fill-opacity', dark ? 0.9 : 0.2);
+            d3.select(this).attr('opacity', dark ? 1 : 0.2);
           });
-          onMouseOver(d.name, event.clientX, event.clientY);
+          onMouseOver({ name: d.name }, event.clientX, event.clientY);
         })
         .on('mouseout', function () {
-          d3.selectAll('path').attr('opacity', startingOpacity);
-          d3.selectAll('circle')
-            .attr('fill-opacity', startingOpacity)
-            .attr('opacity', startingOpacity + 0.2);
+          d3.selectAll('#' + container + ' path[data-role="line"]').attr('opacity', baseOpacity);
+          d3.selectAll('#' + container + ' circle').attr('opacity', baseOpacity);
           onMouseOut();
         });
 
+      // Entrance animation: draw the line in from left to right.
+      let totalLength = line.node().getTotalLength();
+      line
+        .attr('stroke-dasharray', totalLength + ' ' + totalLength)
+        .attr('stroke-dashoffset', totalLength)
+        .transition()
+        .duration(700)
+        .ease(d3.easeCubicOut)
+        .attr('stroke-dashoffset', 0)
+        .on('end', function () {
+          d3.select(this).attr('stroke-dasharray', null);
+        });
+
       // Add Nodes, set class to .name-<i>
-      var node = svg
+      svg
         .append('svg')
         .attr('width', width + 10 + margin.spacer)
         .attr('height', height + margin.spacer + margin.top)
@@ -333,18 +330,20 @@ export default class SvgHandler {
         .enter()
         .append('circle')
         .attr('class', 'name-' + i + container)
+        .attr('data-testid', 'bumpchart-node')
         .attr('cx', function (d) {
           return x(d.date);
         })
         .attr('cy', function (d) {
           return y(d.rank);
         })
-        .attr('fill', colorPal[i % colorPal.length])
-        .attr('fill-opacity', startingOpacity)
-        .attr('r', 10)
-        .attr('stroke', colorPal[i % colorPal.length])
-        .attr('opacity', startingOpacity + 0.2)
-        .attr('stroke-width', 1.5);
+        .attr('fill', seriesColor)
+        .attr('opacity', baseOpacity)
+        .attr('r', 0)
+        .transition()
+        .duration(700)
+        .ease(d3.easeCubicOut)
+        .attr('r', nodeRadius);
     }
 
     ///////////////////////
@@ -355,33 +354,38 @@ export default class SvgHandler {
         let className = d3.select(this).attr('class');
 
         // Circles: selected opacity -> 1, all else -> 0.2
-        d3.selectAll('circle').each(function (d) {
-          var thisClass = d3.select(this).attr('class');
-          var dark = className === thisClass;
-
-          d3.select(this)
-            .attr('opacity', dark ? 1 : 0.2)
-            .attr('fill-opacity', dark ? 1 : 0.2);
-        });
-
-        // Lines: selected opacity -> 1, all else -> 0.2
-        d3.selectAll('path').each(function (d) {
-          var thisClass = d3.select(this).attr('class');
-          var dark = className === thisClass;
+        d3.selectAll('#' + container + ' circle').each(function () {
+          let thisClass = d3.select(this).attr('class');
+          let dark = className === thisClass;
 
           d3.select(this).attr('opacity', dark ? 1 : 0.2);
         });
 
-        var rank = d.rank + 1;
-        let valueText = display(d.value).text;
-        let suffix = display(d.value).suffix ?? '';
-        onMouseOver(`#${rank}: ${d.name} \n ${tooltipMetric}: ${valueText} ${suffix}`, event.clientX, event.clientY);
+        // Lines: selected opacity -> 1, all else -> 0.2
+        d3.selectAll('#' + container + ' path[data-role="line"]').each(function () {
+          let thisClass = d3.select(this).attr('class');
+          let dark = className === thisClass;
+
+          d3.select(this).attr('opacity', dark ? 1 : 0.2);
+        });
+
+        // Structured payload — the panel renders it as two lines (see BumpChart.tsx).
+        let displayed = display(d.value);
+        onMouseOver(
+          {
+            rank: d.rank + 1,
+            name: d.name,
+            metricLabel: tooltipMetric,
+            value: `${displayed.text}${displayed.suffix ?? ''}`,
+            delta: d.delta,
+          },
+          event.clientX,
+          event.clientY
+        );
       })
       .on('mouseout', function () {
-        d3.selectAll('circle')
-          .attr('fill-opacity', startingOpacity)
-          .attr('opacity', startingOpacity + 0.2);
-        d3.selectAll('path').attr('opacity', startingOpacity);
+        d3.selectAll('#' + container + ' circle').attr('opacity', baseOpacity);
+        d3.selectAll('#' + container + ' path[data-role="line"]').attr('opacity', baseOpacity);
         onMouseOut();
       });
   }

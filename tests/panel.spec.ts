@@ -1,6 +1,10 @@
 import { test, expect } from '@grafana/plugin-e2e';
 
-test('should display "No data" in case panel data is empty', async ({
+// The provisioned dashboard has two bump chart panels:
+//   id 1 — wide-format sample data (12 entities x 8 time buckets)
+//   id 2 — a target that returns no data points
+
+test('should display "No data" when the query returns no data points', async ({
   gotoPanelEditPage,
   readProvisionedDashboard,
 }) => {
@@ -9,27 +13,12 @@ test('should display "No data" in case panel data is empty', async ({
   await expect(panelEditPage.panel.locator).toContainText('No data');
 });
 
-test('should display circle when data is passed to the panel', async ({
-  panelEditPage,
-  readProvisionedDataSource,
-  page,
-}) => {
-  const ds = await readProvisionedDataSource({ fileName: 'datasources.yml' });
-  await panelEditPage.datasource.set(ds.name);
-  await panelEditPage.setVisualization('New-Example');
-  await expect(page.getByTestId('simple-panel-circle')).toBeVisible();
-});
-
-test('should display series counter when "Show series counter" option is enabled', async ({
+test('should draw nodes when time series data is passed to the panel', async ({
   gotoPanelEditPage,
   readProvisionedDashboard,
   page,
 }) => {
   const dashboard = await readProvisionedDashboard({ fileName: 'dashboard.json' });
-  const panelEditPage = await gotoPanelEditPage({ dashboard, id: '1' });
-  const options = panelEditPage.getCustomOptions('New-Example');
-  const showSeriesCounter = options.getSwitch('Show series counter');
-
-  await showSeriesCounter.check();
-  await expect(page.getByTestId('simple-panel-series-counter')).toBeVisible();
+  await gotoPanelEditPage({ dashboard, id: '1' });
+  await expect(page.getByTestId('bumpchart-node').first()).toBeVisible();
 });

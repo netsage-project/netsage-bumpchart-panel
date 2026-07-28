@@ -27,31 +27,41 @@
         "type": "grafana-testdata-datasource",
         "uid": "trlxrdZVk"
       },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Gbps"
+        },
+        "overrides": []
+      },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 12,
+        "w": 18,
         "x": 0,
         "y": 0
       },
       "id": 1,
       "options": {
-        "seriesCountSize": "sm",
-        "showSeriesCount": false,
-        "text": "Default value of text input option"
+        "headerText": "Top Talkers",
+        "linecount": "10",
+        "dateFormat": "%m/%d %H:%M",
+        "tooltipMetric": "Traffic (Gbps)",
+        "labelMargin": 150,
+        "txtSize": 12,
+        "lineWidth": 6
       },
       "targets": [
         {
           "datasource": {
             "type": "grafana-testdata-datasource",
-            "uid": "db84e60d-b92a-4089-82cb-34842fb1754b"
+            "uid": "trlxrdZVk"
           },
           "refId": "A",
-          "scenarioId": "raw_frame",
-          "rawFrameContent": "[\n  {\n    \"columns\": [\n      {\n        \"text\": \"Time\",\n        \"type\": \"time\"\n      },\n      {\n        \"text\": \"Label\",\n        \"type\": \"string\"\n      },\n      {\n        \"text\": \"Value\",\n        \"type\": \"number\"\n      }\n    ],\n    \"rows\": [\n      [1609459200000, \"A\", 10],\n      [1609462800000, \"B\", 20],\n      [1609466400000, \"C\", 15],\n      [1609470000000, \"D\", 25],\n      [1609473600000, \"E\", 30]\n    ]\n  },\n{\n    \"columns\": [\n      {\n        \"text\": \"Time\",\n        \"type\": \"time\"\n      },\n      {\n        \"text\": \"Label\",\n        \"type\": \"string\"\n      },\n      {\n        \"text\": \"Value\",\n        \"type\": \"number\"\n      }\n    ],\n    \"rows\": [\n      [1609459200000, \"A\", 40],\n      [1609462800000, \"B\", 50],\n      [1609466400000, \"C\", 45],\n      [1609470000000, \"D\", 55],\n      [1609473600000, \"E\", 60]\n    ]\n  }\n]"
+          "scenarioId": "csv_content",
+          "csvContent": "time,chicago-r1,seattle-r2,newyork-r1,denver-r3,atlanta-r2,dallas-r1,boston-r4,miami-r2,phoenix-r1,portland-r3,kansas-r2,boise-r5\n2024-01-01T00:00:00Z,40,95.2,79.9,74.3,93.3,60,24.4,59,28.7,28.3,80,79\n2024-01-01T03:00:00Z,50.2,107.9,74.5,37.7,78.7,30.7,12.4,68.3,40.2,48.5,113.9,88.6\n2024-01-01T06:00:00Z,56.8,99.5,52.2,6.3,63.9,21.3,32.8,94.3,59.1,65,110.7,56.6\n2024-01-01T09:00:00Z,57.5,75.9,37.3,29.1,54,38.3,63.2,96.4,78.6,66.5,74,33\n2024-01-01T12:00:00Z,52.2,53,46.1,70.5,52.5,70,70.5,71.3,91.9,52,43.8,54.7\n2024-01-01T15:00:00Z,42.5,46.4,69,65.9,59.9,94.9,46.6,58.2,94.5,31.5,53.2,87.8\n2024-01-01T18:00:00Z,32,60.7,81,22.4,73.6,96.1,17.7,77.6,85.3,18.7,91.8,80.6\n2024-01-01T21:00:00Z,24.3,86,68.9,8,88.8,72.8,15.3,99.1,67.7,22.5,117.6,44.4\n"
         }
       ],
-      "title": "Sample Panel Title",
-      "type": "esnet-newexample-panel"
+      "title": "Top Talkers — Bump Chart (sample data)",
+      "type": "netsage-bumpchart-panel"
     },
     {
       "datasource": {
@@ -59,45 +69,51 @@
         "uid": "trlxrdZVk"
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
+        "h": 12,
+        "w": 6,
+        "x": 18,
         "y": 0
       },
       "id": 2,
       "options": {
-        "seriesCountSize": "sm",
-        "showSeriesCount": false,
-        "text": "Default value of text input option"
+        "headerText": "Top Talkers",
+        "linecount": "10",
+        "dateFormat": "%m/%d %H:%M",
+        "tooltipMetric": "Traffic (Gbps)",
+        "labelMargin": 150,
+        "txtSize": 12,
+        "lineWidth": 6
       },
       "targets": [
         {
-          "alias": "",
           "datasource": {
             "type": "grafana-testdata-datasource",
-            "uid": "db84e60d-b92a-4089-82cb-34842fb1754b"
+            "uid": "trlxrdZVk"
           },
           "refId": "A",
           "scenarioId": "no_data_points"
         }
       ],
-      "title": "Sample Panel Title",
-      "type": "esnet-newexample-panel"
+      "title": "No data",
+      "type": "netsage-bumpchart-panel"
     }
   ],
   "refresh": "",
   "schemaVersion": 39,
-  "tags": [],
+  "tags": [
+    "bumpchart",
+    "sample"
+  ],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-6h",
-    "to": "now"
+    "from": "2023-12-31T22:00:00.000Z",
+    "to": "2024-01-01T22:00:00.000Z"
   },
   "timepicker": {},
-  "timezone": "",
-  "title": "Provisioned new-example dashboard",
+  "timezone": "utc",
+  "title": "Bump Chart — Sample Data",
   "uid": "a538aeff-5a8a-42a5-901c-938d896fdd6f",
   "version": 1,
   "weekStart": ""

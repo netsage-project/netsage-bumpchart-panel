@@ -5,4 +5,5 @@ export interface SimpleOptions {
   labelMargin: number;
   txtSize: number;
   dateFormat: string;
+  lineWidth: number;
 }
