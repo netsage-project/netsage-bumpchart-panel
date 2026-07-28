@@ -15,13 +15,14 @@ export default class SvgHandler {
     theme,
     labelMargin,
     txtSize,
-    dateFormat,
+    formatDate,
     onMouseOver,
     onMouseOut,
     opts = {}
   ) {
-    const nodeSizeByValue = opts.nodeSizeByValue !== false;
     const lineWidth = opts.lineWidth != null ? opts.lineWidth : 6;
+    // Every node is the same size; it reads as a slight thickening of its own line.
+    const nodeRadius = lineWidth * 0.75;
 
     // SUPER IMPORTANT! This clears old chart before drawing new one...
     let panel = document.getElementById(this.containerID);
@@ -40,7 +41,6 @@ export default class SvgHandler {
     let finalPositions = data.finalPositions;
     let initialPositions = data.initialPositions;
     let dates = data.dates;
-    let valueExtent = data.valueExtent || [0, 0];
 
     if (!parsedData || parsedData.length === 0) {
       panel.innerHTML += 'No Data';
@@ -57,12 +57,12 @@ export default class SvgHandler {
     let txtLength = Math.floor((labelMargin - 10) / (txtSize * 0.75));
 
     let container = this.containerID;
-    let startingOpacity = 0.5;
+    // Lines and nodes share one opacity, so crossings stay readable through each other.
+    let baseOpacity = 0.65;
 
     // Theme tokens so lines, nodes, axes and text all adapt to light/dark.
     let textColor = theme.colors.text.primary;
     let mutedColor = theme.colors.text.secondary;
-    let surfaceColor = theme.colors.background.primary;
     let gridColor = theme.colors.border.weak;
     let fontFamily = theme.typography.fontFamily;
 
@@ -116,15 +116,6 @@ export default class SvgHandler {
     // Add Y scale
     let y = d3.scaleLinear().domain(dataYrange).range([0, height]);
 
-    // Node radius scale — bigger dot = larger metric value (rank + magnitude).
-    let rScale = d3.scaleSqrt().domain(valueExtent).range([4, 12]);
-    const radiusFor = (value) => {
-      if (!nodeSizeByValue || value == null || Number.isNaN(value) || valueExtent[0] === valueExtent[1]) {
-        return 10;
-      }
-      return rScale(value);
-    };
-
     // ------------------- FUNCTIONS -------------------
     function truncateLabel(text, width) {
       text.each(function () {
@@ -176,9 +167,15 @@ export default class SvgHandler {
         return initialPositions[d].name;
       });
 
-    // Bottom time axis: horizontal, capped tick count for legibility.
-    let ticksCount = Math.max(2, Math.min(dates.length, Math.floor(width / 90)));
-    let bottomAxis = d3.axisBottom(x).ticks(ticksCount).tickSize(5).tickFormat(d3.timeFormat(dateFormat));
+    // Bottom time axis: horizontal, with ticks on the actual data timestamps (thinned to
+    // fit the width) so each label sits under a real column of nodes. Letting d3 pick
+    // "nice" times instead would align them to the *browser's* midnight, which drifts off
+    // the buckets on any dashboard not in local time. formatDate renders each tick in the
+    // dashboard's timezone.
+    let maxTicks = Math.max(2, Math.floor(width / 90));
+    let tickStep = Math.max(1, Math.ceil(dates.length / maxTicks));
+    let tickValues = dates.filter((_, i) => i % tickStep === 0);
+    let bottomAxis = d3.axisBottom(x).tickValues(tickValues).tickSize(5).tickFormat(formatDate);
 
     svg
       .append('g')
@@ -281,7 +278,7 @@ export default class SvgHandler {
         .attr('data-role', 'line')
         .attr('fill', 'none')
         .attr('stroke', seriesColor)
-        .attr('opacity', startingOpacity)
+        .attr('opacity', baseOpacity)
         .attr('stroke-width', lineWidth)
         .attr('stroke-linejoin', 'round')
         .attr('stroke-linecap', 'round')
@@ -298,17 +295,13 @@ export default class SvgHandler {
             let thisClass = d3.select(this).attr('class');
             let dark = className === thisClass;
 
-            d3.select(this)
-              .attr('opacity', dark ? 1 : 0.2)
-              .attr('fill-opacity', dark ? 0.9 : 0.2);
+            d3.select(this).attr('opacity', dark ? 1 : 0.2);
           });
-          onMouseOver(d.name, event.clientX, event.clientY);
+          onMouseOver({ name: d.name }, event.clientX, event.clientY);
         })
         .on('mouseout', function () {
-          d3.selectAll('#' + container + ' path[data-role="line"]').attr('opacity', startingOpacity);
-          d3.selectAll('#' + container + ' circle')
-            .attr('fill-opacity', startingOpacity)
-            .attr('opacity', startingOpacity + 0.2);
+          d3.selectAll('#' + container + ' path[data-role="line"]').attr('opacity', baseOpacity);
+          d3.selectAll('#' + container + ' circle').attr('opacity', baseOpacity);
           onMouseOut();
         });
 
@@ -345,17 +338,12 @@ export default class SvgHandler {
           return y(d.rank);
         })
         .attr('fill', seriesColor)
-        .attr('fill-opacity', startingOpacity)
-        .attr('stroke', surfaceColor) // surface-colored ring keeps overlaps legible
-        .attr('opacity', startingOpacity + 0.2)
-        .attr('stroke-width', 2)
+        .attr('opacity', baseOpacity)
         .attr('r', 0)
         .transition()
         .duration(700)
         .ease(d3.easeCubicOut)
-        .attr('r', function (d) {
-          return radiusFor(d.value);
-        });
+        .attr('r', nodeRadius);
     }
 
     ///////////////////////
@@ -370,9 +358,7 @@ export default class SvgHandler {
           let thisClass = d3.select(this).attr('class');
           let dark = className === thisClass;
 
-          d3.select(this)
-            .attr('opacity', dark ? 1 : 0.2)
-            .attr('fill-opacity', dark ? 1 : 0.2);
+          d3.select(this).attr('opacity', dark ? 1 : 0.2);
         });
 
         // Lines: selected opacity -> 1, all else -> 0.2
@@ -383,24 +369,23 @@ export default class SvgHandler {
           d3.select(this).attr('opacity', dark ? 1 : 0.2);
         });
 
-        let rank = d.rank + 1;
-        let deltaStr = '';
-        if (d.delta != null) {
-          deltaStr = d.delta > 0 ? ` ▲${d.delta}` : d.delta < 0 ? ` ▼${-d.delta}` : ' —';
-        }
-        let valueText = display(d.value).text;
-        let suffix = display(d.value).suffix ?? '';
+        // Structured payload — the panel renders it as two lines (see BumpChart.tsx).
+        let displayed = display(d.value);
         onMouseOver(
-          `#${rank}${deltaStr}: ${d.name} \n ${tooltipMetric}: ${valueText} ${suffix}`,
+          {
+            rank: d.rank + 1,
+            name: d.name,
+            metricLabel: tooltipMetric,
+            value: `${displayed.text}${displayed.suffix ?? ''}`,
+            delta: d.delta,
+          },
           event.clientX,
           event.clientY
         );
       })
       .on('mouseout', function () {
-        d3.selectAll('#' + container + ' circle')
-          .attr('fill-opacity', startingOpacity)
-          .attr('opacity', startingOpacity + 0.2);
-        d3.selectAll('#' + container + ' path[data-role="line"]').attr('opacity', startingOpacity);
+        d3.selectAll('#' + container + ' circle').attr('opacity', baseOpacity);
+        d3.selectAll('#' + container + ' path[data-role="line"]').attr('opacity', baseOpacity);
         onMouseOut();
       });
   }

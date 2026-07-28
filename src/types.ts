@@ -5,6 +5,5 @@ export interface SimpleOptions {
   labelMargin: number;
   txtSize: number;
   dateFormat: string;
-  nodeSizeByValue: boolean;
   lineWidth: number;
 }

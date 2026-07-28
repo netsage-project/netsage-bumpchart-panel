@@ -65,16 +65,10 @@ export const plugin = new PanelPlugin<SimpleOptions>(BumpChart)
       description: 'Font size for axis tick labels',
       defaultValue: 12,
     })
-    .addBooleanSwitch({
-      path: 'nodeSizeByValue',
-      name: 'Scale Nodes by Value',
-      description: 'Size each node by its metric value (rank + magnitude) instead of a uniform radius',
-      defaultValue: true,
-    })
     .addNumberInput({
       path: 'lineWidth',
       name: 'Line Width (px)',
-      description: 'Thickness of the connecting lines',
+      description: 'Thickness of the connecting lines (nodes scale with it)',
       defaultValue: 6,
     });
 });

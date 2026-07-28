@@ -13,8 +13,8 @@ guided interaction).
 | `src/components/BumpChart.tsx` | New theme-aware palette; color-by-identity; Grafana Color-field support; `initialPositions` + value-extent in `transformData`; empty-data hardening |
 | `src/components/RenderBumpChart.js` | Bulk of the rendering work (see below); dead code removed |
 | `src/components/RenderBumpChart.d.ts` | Added the `opts` parameter |
-| `src/module.ts` | New `nodeSizeByValue` + `lineWidth` options; re-enabled the standard **Color** field |
-| `src/types.ts` | Added `nodeSizeByValue: boolean`, `lineWidth: number` |
+| `src/module.ts` | New `lineWidth` option; re-enabled the standard **Color** field |
+| `src/types.ts` | Added `lineWidth: number` |
 | `provisioning/dashboards/dashboard.json` | Rebuilt with real bump chart panels + wide-format sample data |
 | `provisioning/dashboards/sample-data.json` | Standalone copy of the sample frame for manual paste-in testing |
 | `provisioning/datasources/datasources.yml` | Corrected TestData datasource type for Grafana 11+ |
@@ -40,16 +40,26 @@ guided interaction).
 - **Rank numbers** (`#1 … #N`) prefix the right-axis labels, with tabular figures.
 - **Bottom time axis is horizontal** with a capped, width-aware tick count
   (replaced the −60° rotation + word-wrapping).
+- **Axis ticks respect the dashboard timezone.** Labels are rendered with Grafana's
+  `dateTimeFormat` and the panel's `timeZone` prop; previously `d3.timeFormat` was
+  used, which always formats in *browser* local time, so a UTC dashboard showed ticks
+  hours off the data. Ticks are also placed on the actual data timestamps (thinned to
+  fit the width) rather than d3's "nice" times — those are chosen against the
+  browser's midnight and drift off the buckets. Each label now sits exactly under its
+  column of nodes. The **Date Time Format** option keeps storing d3 strftime patterns
+  (saved dashboards are unaffected); they're translated to moment tokens in
+  `BumpChart.tsx`.
 - **All SVG text inherits Grafana's theme font**; axes and ticks use theme ink
   colors, so the whole chart adapts to light/dark — not just the header.
 
 ## 3. Size & motion
 
-- **Node size encodes value** — radius scales with the metric (`d3.scaleSqrt`,
-  ~4–12px), so the chart shows rank *and* magnitude. Toggle with the new
-  **Scale Nodes by Value** option.
-- **Surface-colored ring** (2px) on each node keeps overlapping/crossing points
-  legible.
+- **Uniform, borderless nodes.** Every node is the same size, with no ring —
+  radius is `0.75 × lineWidth`, so a node reads as a slight thickening of its own
+  line and scales with the **Line Width** option.
+- **One opacity (0.65) for lines and nodes**, so crossings stay readable through
+  each other. (Nodes previously stacked `fill-opacity` under `opacity`, which
+  rendered them at ~0.35 effective — noticeably fainter than the lines.)
 - **Entrance animation** revived: lines draw in left-to-right via
   `stroke-dashoffset`; nodes grow from `r=0`. (The old animation path was dead —
   only reachable from a commented-out dropdown, now deleted along with its unused
@@ -61,15 +71,25 @@ guided interaction).
 - **Hover crosshair** — a vertical rule that snaps to the nearest timestamp so all
   ranks at one moment read together. The existing hover-to-isolate (dim the other
   series) is preserved and now scoped to this panel's own elements.
-- **Richer tooltip** — shows rank change vs. the previous bucket, e.g.
-  `#3 ▲2: seattle-r2` alongside the value.
+- **Richer, two-line tooltip** — rank and entity on the first line, metric value and
+  the rank change vs. the previous bucket on the second:
+
+  ```
+  #3: seattle-r2
+  Traffic: 95.2 Gbps  ▲2
+  ```
+
+  The delta is green for a rise, red for a drop, and absent at the first timestamp.
+  The renderer hands the panel a structured payload (`TooltipPayload`) rather than a
+  pre-formatted string, so the tooltip can be real markup — an embedded `\n` in a
+  string collapses to one line inside Grafana's `<Tooltip>`. Hovering a *line*
+  (rather than a node) still shows just the entity name.
 
 ## New panel options
 
 | Option | Type | Default | Purpose |
 |--------|------|---------|---------|
-| Scale Nodes by Value | boolean | `true` | Size nodes by value vs. a uniform radius |
-| Line Width (px) | number | `6` | Thickness of the connecting lines |
+| Line Width (px) | number | `6` | Thickness of the connecting lines; nodes scale with it |
 
 Existing options (Header Text, Number of Lines, Date Time Format, Tooltip Metric
 Label, Label Margin, Text Size) are unchanged.
@@ -99,8 +119,8 @@ panels:
 - **No data** — a `no_data_points` target to exercise the empty state.
 
 Open the dashboard and try: toggle Grafana **light ↔ dark** (everything recolors),
-toggle **Scale Nodes by Value**, hover a line/node (isolate + crosshair + ▲/▼
-tooltip), and edit the options.
+change **Line Width** (nodes scale with it), hover a line/node (isolate + crosshair +
+two-line ▲/▼ tooltip), and edit the options.
 
 ## Test data — CSV to copy/paste into Grafana
 
@@ -153,16 +173,33 @@ npm run e2e           # requires the dev server running
 
 The D3 renderer and the wide-format sample data were exercised end-to-end in jsdom
 (outside Grafana): 12 lines / 96 nodes, 8 distinct palette hues with 4 overflow
-entities grayed, rank-prefixed labels, surface rings, clean teardown on re-render,
-and the empty-data guard all pass without throwing. **The full Grafana toolchain
-(`typecheck`, `lint`, `npm run server`, `npm run e2e`) was not run in the authoring
-environment (Node 16, no deps; the plugin needs Node ≥22)** — run these in a Node 22
-environment before shipping.
+entities grayed, rank-prefixed labels, clean teardown on re-render, and the
+empty-data guard all pass without throwing.
+
+The feedback round above was verified by rendering the whole `BumpChart` panel with
+`@testing-library/react` and driving real hover events: uniform node radius (`4.5` at
+the default 6px line width) with no `stroke`/`fill-opacity`, lines and nodes both at
+`opacity 0.65`, a two-line tooltip (`#3: newyork-r1` / `Traffic: 52.2 ▼1` with the
+delta in the theme's error color), no delta at the first timestamp, name-only on line
+hover, and isolate-then-restore returning every element to `0.65`. `npm run typecheck`,
+`npm run lint`, and `npm run build` pass under Node 22.
+
+Everything above was then confirmed in a **real Grafana 13.1.0** instance (run natively
+via Homebrew — Docker was unavailable, so `npm run server` could not be used). In the
+browser: 96 nodes all reporting `r=4.5` / `opacity=0.65` with no `stroke` or
+`fill-opacity` attribute, lines at `opacity=0.65` / `stroke-width=6`, the two-line
+tooltip (`#3: denver-r3` over `Traffic (Gbps): 70.5 Gbps ▲9`, green), hover-isolate and
+the crosshair, and both light and dark themes. Axis ticks were checked against
+`timezone=utc` (00:00–21:00, matching the data), `browser` (UTC−8), and `Asia/Kolkata`
+(+5:30, rolling into 01/02) — and tick centers align to the node columns within 0px.
+
+**Not run:** `npm run e2e`.
 
 ## Known trade-offs
 
 - The entrance animation replays on any re-render (resize, time change, option
   edit), since the React effect re-runs. Acceptable for now; a "first render only"
   guard could be added if it feels busy.
-- Node sizing runs inside a d3 transition, so it animates in-browser but won't
-  reflect synchronously in a non-browser (jsdom) snapshot — expected.
+- Node radius is applied inside a d3 transition, so a jsdom snapshot taken before the
+  700ms animation lands will read a partial radius — wait for the transition when
+  asserting on it.

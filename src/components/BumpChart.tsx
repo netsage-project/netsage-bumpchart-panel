@@ -1,10 +1,68 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { FieldType, GrafanaTheme2, PanelData, PanelProps } from '@grafana/data';
+import { dateTimeFormat, FieldType, GrafanaTheme2, PanelData, PanelProps } from '@grafana/data';
 import { Tooltip, useTheme2 } from '@grafana/ui';
 import { SimpleOptions } from 'types';
-import SvgHandler from './RenderBumpChart';
+import SvgHandler, { TooltipPayload } from './RenderBumpChart';
 
 interface Props extends PanelProps<SimpleOptions> {}
+
+// The Date Time Format option stores d3 strftime patterns, but the axis is formatted
+// with Grafana's dateTimeFormat so it honors the dashboard timezone (d3.timeFormat is
+// always browser-local, which put the ticks hours off a UTC dashboard). Translate the
+// stored pattern rather than changing the option values, so saved dashboards keep working.
+const D3_TO_MOMENT: Record<string, string> = {
+  Y: 'YYYY',
+  y: 'YY',
+  m: 'MM',
+  d: 'DD',
+  e: 'D',
+  H: 'HH',
+  I: 'hh',
+  M: 'mm',
+  S: 'ss',
+  L: 'SSS',
+  b: 'MMM',
+  B: 'MMMM',
+  a: 'ddd',
+  A: 'dddd',
+  p: 'A',
+  j: 'DDDD',
+  Z: 'ZZ',
+};
+
+function d3FormatToMoment(pattern: string): string {
+  return pattern.replace(/%(.)/g, (match, token: string) =>
+    token === '%' ? '%' : (D3_TO_MOMENT[token] ?? match)
+  );
+}
+
+// Two lines: `#3: seattle-r2` over `Value: 95.2 Gbps  ▲2`. Keeping the rank change on
+// its own line stops the header from getting crowded.
+const TooltipContent: React.FC<{ payload: TooltipPayload; theme: GrafanaTheme2 }> = ({ payload, theme }) => {
+  const { rank, name, metricLabel, value, delta } = payload;
+  const deltaColor =
+    delta == null || delta === 0
+      ? theme.colors.text.secondary
+      : delta > 0
+        ? theme.colors.success.text
+        : theme.colors.error.text;
+
+  return (
+    <div data-testid="bumpchart-tooltip">
+      <div style={{ fontWeight: 500 }}>{rank != null ? `#${rank}: ${name}` : name}</div>
+      {value != null && (
+        <div style={{ color: theme.colors.text.secondary }}>
+          {metricLabel}: {value}
+          {delta != null && (
+            <span style={{ color: deltaColor, marginLeft: theme.spacing(1) }}>
+              {delta > 0 ? `▲${delta}` : delta < 0 ? `▼${-delta}` : '—'}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Validated, colorblind-safe categorical palette (dataviz reference). Assigned in a
 // fixed order by final rank and NEVER cycled — entities beyond these hues fall back
@@ -80,49 +138,31 @@ function transformData(panelData: PanelData, theme: GrafanaTheme2) {
     initialPositions[ranksByTime[0][entityIdx]] = { name: field.name };
   });
 
-  // Global value extent for node-size scaling.
-  let valueMin = Infinity;
-  let valueMax = -Infinity;
-  valueFields.forEach((field) => {
-    for (let t = 0; t < numPoints; t++) {
-      const v = field.values[t];
-      if (v == null || Number.isNaN(v)) {
-        continue;
-      }
-      if (v < valueMin) {
-        valueMin = v;
-      }
-      if (v > valueMax) {
-        valueMax = v;
-      }
-    }
-  });
-  if (!Number.isFinite(valueMin)) {
-    valueMin = 0;
-    valueMax = 0;
-  }
-
   return {
     parsedData,
     finalPositions,
     initialPositions,
     dates,
     display: valueDisplay,
-    valueExtent: [valueMin, valueMax] as [number, number],
   };
 }
 
-export const BumpChart: React.FC<Props> = ({ options, data, width, height, id, replaceVariables }) => {
+export const BumpChart: React.FC<Props> = ({ options, data, width, height, id, replaceVariables, timeZone }) => {
   const theme = useTheme2();
-  const [tooltipState, setTooltipState] = useState<{ show: boolean; content: string; x: number; y: number }>({
+  const [tooltipState, setTooltipState] = useState<{
+    show: boolean;
+    content: TooltipPayload | null;
+    x: number;
+    y: number;
+  }>({
     show: false,
-    content: '',
+    content: null,
     x: 0,
     y: 0,
   });
 
   const onMouseOver = useCallback(
-    (content: string, clientX: number, clientY: number) => {
+    (content: TooltipPayload, clientX: number, clientY: number) => {
       const panelEl = document.getElementById('Chart_' + id);
       const rect = panelEl?.getBoundingClientRect();
       const x = clientX - (rect?.left ?? 0);
@@ -135,6 +175,12 @@ export const BumpChart: React.FC<Props> = ({ options, data, width, height, id, r
   const onMouseOut = useCallback(() => {
     setTooltipState((prev) => ({ ...prev, show: false }));
   }, []);
+
+  // Axis ticks follow the dashboard's timezone, like every other Grafana panel.
+  const formatDate = useCallback(
+    (date: Date) => dateTimeFormat(date.getTime(), { timeZone, format: d3FormatToMoment(options.dateFormat) }),
+    [timeZone, options.dateFormat]
+  );
 
   useEffect(() => {
     const chartData = transformData(data, theme);
@@ -156,20 +202,23 @@ export const BumpChart: React.FC<Props> = ({ options, data, width, height, id, r
       theme,
       options.labelMargin,
       options.txtSize,
-      options.dateFormat,
+      formatDate,
       onMouseOver,
       onMouseOut,
       {
-        nodeSizeByValue: options.nodeSizeByValue,
         lineWidth: options.lineWidth,
       }
     );
-  }, [data, width, height, options, theme, id, replaceVariables, onMouseOver, onMouseOut]);
+  }, [data, width, height, options, theme, id, replaceVariables, onMouseOver, onMouseOut, formatDate]);
 
   return (
     <div style={{ position: 'relative', width, height }}>
       <div id={'Chart_' + id} style={{ height, width }} />
-      <Tooltip content={tooltipState.content} show={tooltipState.show} placement="top">
+      <Tooltip
+        content={tooltipState.content ? <TooltipContent payload={tooltipState.content} theme={theme} /> : ''}
+        show={tooltipState.show}
+        placement="top"
+      >
         <div
           style={{
             position: 'absolute',
